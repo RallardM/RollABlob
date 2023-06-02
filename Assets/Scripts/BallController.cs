@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    private const float DIRECTION = 1f;
-    public float m_moveSpeed = 0.005f * DIRECTION;
-    public float m_torque;
+    public float m_speed = 0.0f;
+    public float m_torque = 10.0f;
     public Rigidbody m_ballRigidbody;
 
     // Start is called before the first frame update
@@ -23,30 +20,28 @@ public class BallController : MonoBehaviour
 
     private void ExecuteMovement()
     {
-        float distanceTraveled = m_moveSpeed * Time.deltaTime;
-        Vector3 translationVector = Vector3.zero;
-  
-        float m_turn = Input.GetAxis("Horizontal");
-        m_ballRigidbody.AddTorque(transform.up * m_torque * m_turn);
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
 
-        if (Input.GetKey(KeyCode.W))
-        {
-            translationVector += new Vector3(0, distanceTraveled, 0);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            translationVector += new Vector3(0, -distanceTraveled, 0);
-        }
+        Vector3 movement = new Vector3(horizontal, 0.0f, vertical);
+        m_ballRigidbody.AddForce(movement * m_speed);
+
         if (Input.GetKey(KeyCode.A))
         {
-            translationVector += new Vector3(-distanceTraveled, 0, 0);
+            m_ballRigidbody.AddTorque(transform.up * -m_torque);
         }
-        if (Input.GetKey(KeyCode.D))
+        else if (Input.GetKey(KeyCode.D))
         {
-            translationVector += new Vector3(distanceTraveled, 0, 0);
+            m_ballRigidbody.AddTorque(transform.up * m_torque);
         }
-        translationVector.Normalize();
-        transform.Translate(translationVector * GetIsShiftPressed());
+        else if (Input.GetKey(KeyCode.W))
+        {
+            m_ballRigidbody.AddTorque(transform.right * -m_torque);
+        }
+        else if (Input.GetKey(KeyCode.S))
+        {
+            m_ballRigidbody.AddTorque(transform.right * m_torque);
+        }
     }
 
     private float GetIsShiftPressed()
