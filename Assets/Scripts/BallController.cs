@@ -5,6 +5,11 @@ public class BallController : MonoBehaviour
     public float m_speed = 0.0f;
     public float m_torque = 10.0f;
     public Rigidbody m_ballRigidbody;
+    //public Transform m_cameraPivot;
+    public Transform m_thirdPersonCamera;
+    float m_direction;
+
+    Vector2 m_input;
 
     // Start is called before the first frame update
     void Start()
@@ -20,10 +25,27 @@ public class BallController : MonoBehaviour
 
     private void ExecuteMovement()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        //float horizontal = Input.GetAxis("Horizontal");
+        //float vertical = Input.GetAxis("Vertical");
 
-        Vector3 movement = new Vector3(horizontal, 0.0f, vertical);
+        //m_direction += Input.GetAxis("Mouse X") * Time.deltaTime * 180;
+
+
+        Vector3 camForward = m_thirdPersonCamera.forward;
+        Vector3 camRight = m_thirdPersonCamera.right;
+
+        camForward.y = 0;
+        camRight.y = 0;
+        camForward = camForward.normalized;
+        camRight = camRight.normalized;
+
+        //m_input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+
+        //transform.position += (camFoward * m_input.y + camRight * m_input.x) * Time.deltaTime * 5;
+
+        Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector3 movement = (camForward * input.y + camRight * input.x).normalized;
         m_ballRigidbody.AddForce(movement * m_speed);
 
         if (Input.GetKey(KeyCode.A))
@@ -54,3 +76,5 @@ public class BallController : MonoBehaviour
     }
 
 }
+
+// Source : https://youtu.be/ORD7gsuLivE
