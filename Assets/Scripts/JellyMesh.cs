@@ -7,6 +7,7 @@ public class JellyMesh : MonoBehaviour
     public float m_mass = 1f;
     public float m_stiffness = 1f;
     public float m_damping = 0.75f;
+    public float m_squashing = 0f;
 
     private Mesh m_originalMesh, m_meshClone;
     private MeshRenderer m_renderer;
@@ -35,6 +36,11 @@ public class JellyMesh : MonoBehaviour
         {
             Vector3 m_target = transform.TransformPoint(m_vertexArray[m_jellyVertex[i].m_id]);
             float m_newIntensity = (1 - (m_renderer.bounds.max.y - m_target.y) / m_renderer.bounds.size.y) * m_intensity;
+
+            // Calculate the squashing amount based on m_squashing
+            float squashingAmount = Mathf.Lerp(0f, m_squashing, m_newIntensity);
+            m_target.y -= squashingAmount;
+
             m_jellyVertex[i].Shake(m_target, m_mass, m_stiffness, m_damping);
             m_target = transform.InverseTransformPoint(m_jellyVertex[i].m_position);
             m_vertexArray[m_jellyVertex[i].m_id] = Vector3.Lerp(m_vertexArray[m_jellyVertex[i].m_id], m_target, m_intensity);
