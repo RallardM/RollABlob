@@ -5,9 +5,9 @@ public class BallController : MonoBehaviour
     public float m_speed = 0.0f;
     public float m_torque = 10.0f;
     public Rigidbody m_ballRigidbody;
-    //public Transform m_cameraPivot;
     public Transform m_thirdPersonCamera;
-    float m_direction;
+
+    private float m_direction;
 
     Vector2 m_input;
 
@@ -25,12 +25,7 @@ public class BallController : MonoBehaviour
 
     private void ExecuteMovement()
     {
-        //float horizontal = Input.GetAxis("Horizontal");
-        //float vertical = Input.GetAxis("Vertical");
-
-        //m_direction += Input.GetAxis("Mouse X") * Time.deltaTime * 180;
-
-
+        // Get the direction of where the camera is facing and the direction of where the right of the camera is facing
         Vector3 camForward = m_thirdPersonCamera.forward;
         Vector3 camRight = m_thirdPersonCamera.right;
 
@@ -38,11 +33,6 @@ public class BallController : MonoBehaviour
         camRight.y = 0;
         camForward = camForward.normalized;
         camRight = camRight.normalized;
-
-        //m_input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-
-
-        //transform.position += (camFoward * m_input.y + camRight * m_input.x) * Time.deltaTime * 5;
 
         Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         Vector3 movement = (camForward * input.y + camRight * input.x).normalized;
@@ -77,4 +67,7 @@ public class BallController : MonoBehaviour
 
 }
 
+// Source : https://youtu.be/Gin9nVJ2nYc
+// Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
+// Source : https://youtu.be/XYJpDig5s6U
 // Source : https://youtu.be/ORD7gsuLivE

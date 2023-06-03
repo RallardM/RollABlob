@@ -29,7 +29,7 @@ public class CameraFollow : MonoBehaviour
         // Clamp the pitch value to avoid flipping the camera
         m_mouseY = Mathf.Clamp(m_mouseY, m_clampCamDown, m_clampCamUp);
 
-        // Calculate the rotation based on yaw and pitch
+        // Calculate the rotation based on the X and Y
         Quaternion rotation = Quaternion.Euler(m_mouseY, m_mouseX, 0f);
 
         // Get the desired position for the camera

@@ -3,6 +3,8 @@ using UnityEngine.UIElements;
 
 public class JellyMesh : MonoBehaviour
 {
+    public MeshCollider m_sphereCollider;
+
     public float m_intensity = 1f;
     public float m_mass = 1f;
     public float m_stiffness = 1f;
@@ -37,9 +39,10 @@ public class JellyMesh : MonoBehaviour
             Vector3 m_target = transform.TransformPoint(m_vertexArray[m_jellyVertex[i].m_id]);
             float m_newIntensity = (1 - (m_renderer.bounds.max.y - m_target.y) / m_renderer.bounds.size.y) * m_intensity;
 
-            // Calculate the squashing amount based on m_squashing
+            // Calculate the squashing amount based on m_squashing and m_intensity linear interpolation
+            // and applies that squashing amount on the player's mesh and collider in their y coordinates
             float squashingAmount = Mathf.Lerp(0f, m_squashing, m_newIntensity);
-            m_target.y -= squashingAmount;
+            m_target.y -= m_target.y * squashingAmount;
 
             m_jellyVertex[i].Shake(m_target, m_mass, m_stiffness, m_damping);
             m_target = transform.InverseTransformPoint(m_jellyVertex[i].m_position);
@@ -74,3 +77,5 @@ public class JellyMesh : MonoBehaviour
 }
 
 // Source : https://www.youtube.com/watch?v=Kwh4TkQqqf8
+// Source : https://youtu.be/mPgODeBDyIw
+// Source : https://answers.unity.com/questions/523289/change-size-of-mesh-at-runtime.html
