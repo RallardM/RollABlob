@@ -1,3 +1,8 @@
+// Source : https://youtu.be/Gin9nVJ2nYc
+// Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
+// Source : https://youtu.be/XYJpDig5s6U
+// Source : https://youtu.be/ORD7gsuLivE
+
 using UnityEngine;
 
 public class BallController : MonoBehaviour
@@ -67,7 +72,3 @@ public class BallController : MonoBehaviour
 
 }
 
-// Source : https://youtu.be/Gin9nVJ2nYc
-// Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
-// Source : https://youtu.be/XYJpDig5s6U
-// Source : https://youtu.be/ORD7gsuLivE
