@@ -3,12 +3,13 @@
 // Source : https://youtu.be/XYJpDig5s6U
 // Source : https://youtu.be/ORD7gsuLivE
 
+
 using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    public float m_speed = 0.0f;
-    public float m_torque = 10.0f;
+    public float m_speed = 10.0f;
+    public float m_torque = 20.0f;
     public Rigidbody m_ballRigidbody;
     public Transform m_thirdPersonCamera;
 
@@ -19,46 +20,78 @@ public class BallController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_ballRigidbody = GetComponent<Rigidbody>();
+        //m_ballRigidbody = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        ExecuteMovement();
+        //ExecuteMovement();
+        Vector3 vector3 = new Vector3();
+        if (Input.GetKey(KeyCode.W))
+        {
+            vector3 += new Vector3(1, 0, 0);
+        }
+        else if (Input.GetKey(KeyCode.A))
+        {
+            vector3 += new Vector3(0, 0, 1);
+        }
+        else if (Input.GetKey(KeyCode.A))
+        {
+            vector3 += new Vector3(-1, 0, 0);
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            vector3 += new Vector3(0, 0, -1);
+        }
+
+        vector3.Normalize();
+        if (vector3.magnitude <= 0)
+        {
+            return;
+        }
+        m_ballRigidbody.AddTorque(vector3 * m_torque * Time.fixedDeltaTime, ForceMode.Force);
     }
 
     private void ExecuteMovement()
     {
         // Get the direction of where the camera is facing and the direction of where the right of the camera is facing
-        Vector3 camForward = m_thirdPersonCamera.forward;
-        Vector3 camRight = m_thirdPersonCamera.right;
+        //Vector3 camForward = m_thirdPersonCamera.forward;
+        //Vector3 camRight = m_thirdPersonCamera.right;
 
-        camForward.y = 0;
-        camRight.y = 0;
-        camForward = camForward.normalized;
-        camRight = camRight.normalized;
+        //amForward.y = 0;
+        //camRight.y = 0;
+        //camForward = camForward.normalized;
+        //camRight = camRight.normalized;
 
-        Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        Vector3 movement = (camForward * input.y + camRight * input.x).normalized;
-        m_ballRigidbody.AddForce(movement * m_speed);
+        //Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        //Vector3 movement = (camForward * input.y + camRight * input.x).normalized;
+        //m_ballRigidbody.AddForce(movement * m_speed);
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            m_ballRigidbody.AddTorque(transform.up * -m_torque);
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            m_ballRigidbody.AddTorque(transform.up * m_torque);
-        }
-        else if (Input.GetKey(KeyCode.W))
-        {
-            m_ballRigidbody.AddTorque(transform.right * -m_torque);
-        }
-        else if (Input.GetKey(KeyCode.S))
-        {
-            m_ballRigidbody.AddTorque(transform.right * m_torque);
-        }
+        //Vector3 vector3 = new Vector3();
+        //if (Input.GetKey(KeyCode.W))
+        //{
+        //    vector3 += new Vector3(1, 0, 0);
+        //}
+        //else if (Input.GetKey(KeyCode.A))
+        //{
+        //    vector3 += new Vector3(0, 0, 1);
+        //}
+        //else if (Input.GetKey(KeyCode.A))
+        //{
+        //    vector3 += new Vector3(-1, 0, 0);
+        //}
+        //else if (Input.GetKey(KeyCode.D))
+        //{
+        //    vector3 += new Vector3(0, 0, -1);
+        //}
+
+        //vector3.Normalize();
+        //if (vector3.magnitude <= 0)
+        //{
+        //    return;
+        //}
+        //m_ballRigidbody.AddTorque(vector3 * m_torque * Time.fixedDeltaTime, ForceMode.Force);
     }
 
     private float GetIsShiftPressed()

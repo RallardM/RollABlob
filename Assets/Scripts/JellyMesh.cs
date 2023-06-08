@@ -15,21 +15,26 @@ public class JellyMesh : MonoBehaviour
     public float m_damping = 0.75f;
     public float m_squashing = 0f;
     public float m_flattenY = 0f;
+    private Rigidbody m_rigidbody;
 
     private Mesh m_originalMesh, m_meshClone;
     private MeshRenderer m_renderer;
     private JellyVertex[] m_jellyVertex;
     private Vector3[] m_vertexArray;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
+        m_rigidbody = GetComponent<Rigidbody>();
         m_originalMesh = GetComponent<MeshFilter>().sharedMesh;
         m_meshClone = Instantiate(m_originalMesh);
         GetComponent<MeshFilter>().sharedMesh = m_meshClone;
         m_renderer = GetComponent<MeshRenderer>();
         m_jellyVertex = new JellyVertex[m_meshClone.vertices.Length];
+    }
 
+    // Start is called before the first frame update
+    void Start()
+    {
         for (int i = 0; i < m_meshClone.vertices.Length; i++)
         {
             Vector3 vertex = m_meshClone.vertices[i];
@@ -64,7 +69,7 @@ public class JellyMesh : MonoBehaviour
                 m_target.y = m_flattenY;
             }
 
-            m_jellyVertex[i].Shake(m_target, m_mass, m_stiffness, m_damping);
+            m_jellyVertex[i].Shake(m_target, m_rigidbody.mass, m_stiffness, m_damping);
             m_target = transform.InverseTransformPoint(m_jellyVertex[i].m_position);
             m_vertexArray[m_jellyVertex[i].m_id] = Vector3.Lerp(m_vertexArray[m_jellyVertex[i].m_id], m_target, m_intensity);
         }

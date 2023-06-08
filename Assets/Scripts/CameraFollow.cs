@@ -1,5 +1,7 @@
+// Source : https://forum.unity.com/threads/how-to-get-pitch-and-yaw-of-goal-position-for-camera-orbit-solved.417644/
+// Source : https://youtu.be/sNmeK3qK7oA
+
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class CameraFollow : MonoBehaviour
 {
@@ -8,16 +10,11 @@ public class CameraFollow : MonoBehaviour
     public float m_smoothSpeed = 1.0f;
     public float m_clampCamUp = 90f;
     public float m_clampCamDown = -90f;
-    public Vector3 m_offset;
+
+    private Vector3 m_offset = new Vector3(0, 2, -4);
 
     private float m_mouseX = 0f;
     private float m_mouseY = 0f;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
 
     // Update is called once per frame
     void LateUpdate()
@@ -40,5 +37,3 @@ public class CameraFollow : MonoBehaviour
         transform.LookAt(m_targetPalyer.position);
     }
 }
-
-// Source : https://forum.unity.com/threads/how-to-get-pitch-and-yaw-of-goal-position-for-camera-orbit-solved.417644/
