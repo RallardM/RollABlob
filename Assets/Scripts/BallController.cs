@@ -11,46 +11,46 @@ public class BallController : MonoBehaviour
     public float m_speed = 10.0f;
     public float m_torque = 20.0f;
     public Rigidbody m_ballRigidbody;
-    public Transform m_thirdPersonCamera;
+    public Camera m_thirdPersonCamera;
 
     private float m_direction;
 
     Vector2 m_input;
 
     // Start is called before the first frame update
-    void Start()
-    {
-        //m_ballRigidbody = GetComponent<Rigidbody>();
-    }
+    //void Start()
+    //{
+    //    //m_ballRigidbody = GetComponent<Rigidbody>();
+    //}
 
     // Update is called once per frame
     void FixedUpdate()
     {
         //ExecuteMovement();
-        Vector3 vector3 = new Vector3();
+        Vector3 direction = new Vector3();
         if (Input.GetKey(KeyCode.W))
         {
-            vector3 += new Vector3(1, 0, 0);
+            direction += m_thirdPersonCamera.transform.TransformDirection(1, 0, 0);
         }
         else if (Input.GetKey(KeyCode.A))
         {
-            vector3 += new Vector3(0, 0, 1);
+            direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, 1);
         }
         else if (Input.GetKey(KeyCode.A))
         {
-            vector3 += new Vector3(-1, 0, 0);
+            direction += m_thirdPersonCamera.transform.TransformDirection(-1, 0, 0);
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            vector3 += new Vector3(0, 0, -1);
+            direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, -1);
         }
 
-        vector3.Normalize();
-        if (vector3.magnitude <= 0)
+        direction.Normalize();
+        if (direction.magnitude <= 0)
         {
             return;
         }
-        m_ballRigidbody.AddTorque(vector3 * m_torque * Time.fixedDeltaTime, ForceMode.Force);
+        m_ballRigidbody.AddTorque(direction * m_torque * m_speed * GetIsShiftPressed() * Time.fixedDeltaTime, ForceMode.Force);
     }
 
     private void ExecuteMovement()

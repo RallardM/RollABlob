@@ -7,7 +7,7 @@ public class CameraFollow : MonoBehaviour
 {
     public Transform m_targetPalyer;
     public float m_mouseSensitivity = 100f;
-    public float m_smoothSpeed = 1.0f;
+    public float m_smoothSpeed = 0.05f;
     public float m_clampCamUp = 90f;
     public float m_clampCamDown = -90f;
 
@@ -31,6 +31,8 @@ public class CameraFollow : MonoBehaviour
 
         // Get the desired position for the camera
         Vector3 desiredPosition = m_targetPalyer.position + rotation * m_offset;
+        Vector3 smoothPosition = Vector3.Lerp(transform.position, desiredPosition, m_smoothSpeed);
+        transform.position = smoothPosition;
 
         // Set the camera's position and rotation
         transform.position = desiredPosition;
