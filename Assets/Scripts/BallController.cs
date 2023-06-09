@@ -28,11 +28,21 @@ public class BallController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Object is triggered");
+        //Debug.Log("Object is triggered");
 
-        if (other.gameObject.CompareTag("Floor"))
+        if (other.gameObject.CompareTag("Jumpable"))
         {
             m_isGrounded = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        //Debug.Log("Object is not triggered");
+
+        if (other.gameObject.CompareTag("Jumpable"))
+        {
+            m_isGrounded = false;
         }
     }
 
@@ -42,7 +52,17 @@ public class BallController : MonoBehaviour
 
         if (m_isGrounded)
         {
-            Debug.Log("Object is grounded");
+            //Debug.Log("Object is grounded");
+        }
+
+        if (m_isGrounded && Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Space is pressed");
+        }
+
+        if (m_isGrounded && Input.GetKeyUp(KeyCode.Space))
+        {
+            Debug.Log("Space is released");
         }
 
         //if (m_isGrounded && Input.GetKeyDown(KeyCode.Space))
@@ -55,15 +75,15 @@ public class BallController : MonoBehaviour
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(1, 0, 0);
         }
-        else if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, 1);
         }
-        else if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.S))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(-1, 0, 0);
         }
-        else if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, -1);
         }
@@ -75,6 +95,7 @@ public class BallController : MonoBehaviour
             return;
         }
 
+        //Debug.Log("Shit hit equals : " + GetIsShiftPressed());
         m_ballRigidbody.AddTorque(direction * m_torque * m_speed * GetIsShiftPressed() * Time.fixedDeltaTime, ForceMode.Force);
     }
 
@@ -82,7 +103,8 @@ public class BallController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            return 2f;
+            //Debug.Log("Shit hit");
+            return 1000f;
         }
         return 1f;
     }
