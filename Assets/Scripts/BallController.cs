@@ -2,9 +2,11 @@
 // Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
 // Source : https://youtu.be/XYJpDig5s6U
 // Source : https://youtu.be/ORD7gsuLivE
+// Source : Maxime
 
 
 using UnityEngine;
+using static JellyMesh;
 
 public class BallController : MonoBehaviour
 {
@@ -13,20 +15,41 @@ public class BallController : MonoBehaviour
     public Rigidbody m_ballRigidbody;
     public Camera m_thirdPersonCamera;
 
+    private JellyMesh m_jellyMesh;
     private float m_direction;
+    private bool m_isGrounded = false;
 
     Vector2 m_input;
 
-    // Start is called before the first frame update
-    //void Start()
-    //{
-    //    //m_ballRigidbody = GetComponent<Rigidbody>();
-    //}
+    private void Awake()
+    {
+        m_jellyMesh = GetComponent<JellyMesh>();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Object is triggered");
+
+        if (other.gameObject.tag == "Floor")
+        {
+            m_isGrounded = true;
+        }
+    }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        //ExecuteMovement();
+
+        if (m_isGrounded)
+        {
+            Debug.Log("Object is grounded");
+        }
+
+        //if (m_isGrounded && Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    m_jellyMesh.m_squashing += 0.05f;
+        //}
+
         Vector3 direction = new Vector3();
         if (Input.GetKey(KeyCode.W))
         {
@@ -36,7 +59,7 @@ public class BallController : MonoBehaviour
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, 1);
         }
-        else if (Input.GetKey(KeyCode.A))
+        else if (Input.GetKey(KeyCode.S))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(-1, 0, 0);
         }
@@ -46,52 +69,13 @@ public class BallController : MonoBehaviour
         }
 
         direction.Normalize();
+
         if (direction.magnitude <= 0)
         {
             return;
         }
+
         m_ballRigidbody.AddTorque(direction * m_torque * m_speed * GetIsShiftPressed() * Time.fixedDeltaTime, ForceMode.Force);
-    }
-
-    private void ExecuteMovement()
-    {
-        // Get the direction of where the camera is facing and the direction of where the right of the camera is facing
-        //Vector3 camForward = m_thirdPersonCamera.forward;
-        //Vector3 camRight = m_thirdPersonCamera.right;
-
-        //amForward.y = 0;
-        //camRight.y = 0;
-        //camForward = camForward.normalized;
-        //camRight = camRight.normalized;
-
-        //Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        //Vector3 movement = (camForward * input.y + camRight * input.x).normalized;
-        //m_ballRigidbody.AddForce(movement * m_speed);
-
-        //Vector3 vector3 = new Vector3();
-        //if (Input.GetKey(KeyCode.W))
-        //{
-        //    vector3 += new Vector3(1, 0, 0);
-        //}
-        //else if (Input.GetKey(KeyCode.A))
-        //{
-        //    vector3 += new Vector3(0, 0, 1);
-        //}
-        //else if (Input.GetKey(KeyCode.A))
-        //{
-        //    vector3 += new Vector3(-1, 0, 0);
-        //}
-        //else if (Input.GetKey(KeyCode.D))
-        //{
-        //    vector3 += new Vector3(0, 0, -1);
-        //}
-
-        //vector3.Normalize();
-        //if (vector3.magnitude <= 0)
-        //{
-        //    return;
-        //}
-        //m_ballRigidbody.AddTorque(vector3 * m_torque * Time.fixedDeltaTime, ForceMode.Force);
     }
 
     private float GetIsShiftPressed()
@@ -102,6 +86,4 @@ public class BallController : MonoBehaviour
         }
         return 1f;
     }
-
 }
-
