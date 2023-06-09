@@ -30,7 +30,7 @@ public class BallController : MonoBehaviour
     {
         Debug.Log("Object is triggered");
 
-        if (other.gameObject.tag == "Floor")
+        if (other.gameObject.CompareTag("Floor"))
         {
             m_isGrounded = true;
         }
