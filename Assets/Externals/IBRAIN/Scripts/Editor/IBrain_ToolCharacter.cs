@@ -20,7 +20,8 @@ public class IBrain_ToolCharacter : EditorWindow
 		GetWindow(typeof(IBrain_ToolCharacter));
 	}
 
-	void OnGUI ()
+    [System.Obsolete]
+    void OnGUI ()
     {
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();

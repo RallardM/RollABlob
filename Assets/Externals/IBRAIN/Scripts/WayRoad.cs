@@ -18,12 +18,9 @@ public class WayRoad : MonoBehaviour {
 		for (int i = 0; i < transform.childCount; i++)
 		{
 			waypoints[i] = transform.GetChild(i).gameObject.transform;          
-			RaycastHit hit;
-
-
+			//RaycastHit hit;
 		}
 	}
-
 
 	void  OnDrawGizmos (){
 
