@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class JellyMesh : MonoBehaviour
 {
-    public SphereCollider m_playerCollider;
+    //public SphereCollider m_playerCollider;
 
     public float m_intensity = 1f;
     //public float m_mass = 1f;

@@ -10,8 +10,7 @@ public class CameraFollow : MonoBehaviour
     public float m_smoothSpeed = 0.05f;
     public float m_clampCamUp = 90f;
     public float m_clampCamDown = -90f;
-
-    private Vector3 m_offset = new Vector3(0, 2, -4);
+    public Vector3 m_offset = new Vector3(0, 2, -4);
 
     private float m_mouseX = 0f;
     private float m_mouseY = 0f;
