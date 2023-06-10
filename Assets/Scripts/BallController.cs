@@ -26,6 +26,7 @@ public class BallController : MonoBehaviour
     private Rigidbody m_ballRigidbody;
     private JellyMesh m_jellyMesh;
     private Vector3 m_jumpDirection;
+    private Vector3 m_previousDirection;
     private float m_initialSquashing;
     private float m_prepareJumpSquashing;
     private float m_midAirJumpStretching;
@@ -94,23 +95,33 @@ public class BallController : MonoBehaviour
         }
 
         Vector3 direction = new Vector3();
+        Vector3 lerpDirection = new Vector3();
         if (Input.GetKey(KeyCode.W))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(1, 0, 0);
+            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            m_previousDirection = new Vector3(1, 0, 0);
         }
         if (Input.GetKey(KeyCode.A))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, 1);
+            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            m_previousDirection = new Vector3(0, 0, 1);
         }
         if (Input.GetKey(KeyCode.S))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(-1, 0, 0);
+            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            m_previousDirection = new Vector3(-1, 0, 0);
         }
         if (Input.GetKey(KeyCode.D))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, -1);
+            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            m_previousDirection = new Vector3(0, 0, -1);
         }
 
+        direction = Vector3.Lerp(lerpDirection, direction, m_lerpElapsedTime);
         direction.Normalize();
 
         if (direction.magnitude <= 0)
@@ -118,7 +129,7 @@ public class BallController : MonoBehaviour
             return;
         }
 
-        //Debug.Log("Shit hit equals : " + GetIsShiftPressed());
+        
         m_ballRigidbody.AddTorque(direction * m_torque * m_speed * GetIsShiftPressed() * Time.fixedDeltaTime, ForceMode.Force);
     }
 

@@ -35,9 +35,6 @@ public class CameraFollow : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        m_ballController = m_ballRigidbody.GetComponent<BallController>();
-        m_lerpElapsedTime += Time.fixedDeltaTime;
-        float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
         // Calculate mouse rotations
         m_mouseX += m_mouseSensitivity * Input.GetAxis("Mouse X");
         m_mouseY -= m_mouseSensitivity * Input.GetAxis("Mouse Y");
