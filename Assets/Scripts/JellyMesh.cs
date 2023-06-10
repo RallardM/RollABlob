@@ -7,10 +7,7 @@ using UnityEngine;
 
 public class JellyMesh : MonoBehaviour
 {
-    //public SphereCollider m_playerCollider;
-
     public float m_intensity = 1f;
-    //public float m_mass = 1f;
     public float m_stiffness = 1f;
     public float m_damping = 0.75f;
     public float m_squashing = 0f;
@@ -57,11 +54,6 @@ public class JellyMesh : MonoBehaviour
             // and applies that squashing amount on the player's mesh and collider in their y coordinates
             float squashingAmount = Mathf.Lerp(0f, m_squashing, m_newIntensity);
             m_target.y -= m_target.y * squashingAmount;
-
-            //Vector3 playerColliderCurrentPosition = m_playerCollider.transform.position;
-            //Vector3 playerColliderNewPosition = new(0f, playerColliderCurrentPosition.y + m_flattenY, 0f);
-            //playerColliderPosition.y = playerColliderPosition.y * m_flattenY;
-            //m_playerCollider.transform.position = playerColliderNewPosition;
 
             // Flatten the vertices below the mesh
             if (m_target.y < m_flattenY)
