@@ -20,8 +20,6 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private Vector3 m_initialRigidBodyPos;
     private float m_mouseX = 0f;
     private float m_mouseY = 0f;
-    private float m_lerpDuration = 3f;
-    private float m_lerpElapsedTime;
 
     public Vector3 InitialRigidBodyPos { get => m_initialRigidBodyPos; set => m_initialRigidBodyPos = value; }
 
@@ -29,7 +27,7 @@ public class CameraFollow : MonoBehaviour
     {
         m_thirdPersonCamera = GetComponent<Camera>();
         m_ballRigidbody = transform.parent.Find("PlayerBlob").gameObject.GetComponent<Rigidbody>();
-        //m_ballController = m_ballRigidbody.GetComponent<BallController>();
+        m_ballController = m_ballRigidbody.GetComponent<BallController>();
     }
 
     // Update is called once per frame
@@ -59,12 +57,12 @@ public class CameraFollow : MonoBehaviour
         currentHeightDistance = m_currentRigidBodyPos.y - m_initialRigidBodyPos.y;
         if (!m_ballController.IsGrounded && currentHeightDistance > 0f)
         {
-            Debug.Log("Player is in the air");
+            //Debug.Log("Player is in the air");
             m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, m_jumpingCameraOffset, Time.deltaTime);
         }
         else if (m_ballController.IsGrounded)
         {
-            Debug.Log("Player hit the ground");
+            //Debug.Log("Player hit the ground");
             m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, m_initialOffset, Time.deltaTime);
         }
     }

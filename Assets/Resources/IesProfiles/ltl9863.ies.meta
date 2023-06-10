@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: 0ddaba7a9001092479b84e484642b4d4
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 9801397f829a1ed42984340315cbf362, type: 3}
+  iesMetaData:
+    FileFormatVersion: LM-63-1991
+    IESPhotometricType: Type C
+    IESMaximumIntensity: 55200
+    IESMaximumIntensityUnit: Lumens
+    Manufacturer: LITHONIA LIGHTING
+    LuminaireCatalogNumber: CHX 1000MV R3 DLG (III-MED-SEMICUTOFF)
+    LuminaireDescription: GLASS REFRACTOR, ALUMINUM REFLECTOR SOCKET POSITION S3
+      & 3B
+    LampCatalogNumber: 
+    LampDescription: ONE 1000-WATT CLEAR BT-56 MERCURY VAPOR, HORIZONTAL POSITION.
+    PrefabLightType: 0
+    SpotAngle: 120
+    iesSize: 128
+    ApplyLightAttenuation: 1
+    UseIESMaximumIntensity: 1
+    CookieCompression: 2
+    LightAimAxisRotation: -90
