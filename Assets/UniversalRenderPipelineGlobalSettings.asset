@@ -15,7 +15,7 @@ MonoBehaviour:
   k_AssetVersion: 2
   lightLayerName0: Light Layer default
   lightLayerName1: BlobCaustics
-  lightLayerName2: Light Layer 2
+  lightLayerName2: BlobPlayer
   lightLayerName3: Light Layer 3
   lightLayerName4: Light Layer 4
   lightLayerName5: Light Layer 5

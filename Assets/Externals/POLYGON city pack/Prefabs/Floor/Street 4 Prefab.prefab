@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4737365782299246}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Street 4 Prefab
   m_TagString: Jumpable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &4737365782299246
 Transform:
@@ -44,12 +44,12 @@ GameObject:
   - component: {fileID: 33837854661762396}
   - component: {fileID: 23910408433680958}
   - component: {fileID: 1006401002099081050}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: street
   m_TagString: Jumpable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &4285674003731666
 Transform:
@@ -91,7 +91,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 5
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e392b3db3896de742a7fe9186046092b, type: 2}

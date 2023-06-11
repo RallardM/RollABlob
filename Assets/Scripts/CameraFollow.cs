@@ -8,7 +8,7 @@ public class CameraFollow : MonoBehaviour
     public float m_mouseSensitivity = 100f;
     public float m_smoothSpeed = 0.05f;
     public float m_clampCamUp = 90f;
-    public float m_clampCamDown = -90f;
+    public float m_clampCamDown = -80f;
 
     private Rigidbody m_ballRigidbody;
     private Camera m_thirdPersonCamera;

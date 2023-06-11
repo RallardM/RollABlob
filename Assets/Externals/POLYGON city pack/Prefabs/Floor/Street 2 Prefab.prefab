@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4514217353711810}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Street 2 Prefab
   m_TagString: Jumpable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &4514217353711810
 Transform:
@@ -44,12 +44,12 @@ GameObject:
   - component: {fileID: 33528816509266850}
   - component: {fileID: 23780950900328674}
   - component: {fileID: 64907722752160762}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: street
   m_TagString: Jumpable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &4828932480504826
 Transform:

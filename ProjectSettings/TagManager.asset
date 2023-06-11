@@ -10,12 +10,12 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - BlobCaustics
+  - WallsFloors
   - Water
   - UI
   - PlayerBlob
-  - 
-  - 
+  - NPCs
+  - BlobAbsorbable
   - 
   - 
   - 

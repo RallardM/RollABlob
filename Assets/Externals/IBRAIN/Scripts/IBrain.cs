@@ -196,14 +196,14 @@ public class IBrain : MonoBehaviour
         //Debug.Log("Flee trigger distance : " + m_fleeTriggerDistance);
         if (distanceNPCvsBlob < m_fleeTriggerDistance)
         {
-            Debug.Log("Running");
+            //Debug.Log("Running");
             //float magnitude = distanceNPCvsBlob.magnitude;
             Vector3 opositeDirection = (m_player.position - transform.position).normalized;
             MoveToPos(transform.position - (opositeDirection));
         }
         else if (distanceNPCvsBlob > m_fleeSafeDistance)
         {
-            Debug.Log("Walking");
+            //Debug.Log("Walking");
             Walking();
         }
     }
@@ -252,13 +252,12 @@ public class IBrain : MonoBehaviour
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
         if (Physics.Raycast(ray, out hit))
-        {
             speed = 5f;
-        }
 
         Quaternion q = new Quaternion();
-        q.SetLookRotation(hit.normal, Vector3.forward);
-        agent.destination = hit.point;
+        if (hit.normal != Vector3.zero)
+            q.SetLookRotation(hit.normal, Vector3.forward);
+            agent.destination = hit.point;
     }
 
 
@@ -267,9 +266,9 @@ public class IBrain : MonoBehaviour
         var ray = TargetPosition;
         RaycastHit hit = new RaycastHit();
         Quaternion q = new Quaternion();
-        q.SetLookRotation(hit.normal, Vector3.forward);
-        agent.destination = TargetPosition;
-
+        if (hit.normal != Vector3.zero)
+            q.SetLookRotation(hit.normal, Vector3.forward);
+            agent.destination = TargetPosition;
     }
 
     protected void SetupAgentLocomotion()
