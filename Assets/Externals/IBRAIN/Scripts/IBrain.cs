@@ -15,6 +15,9 @@ public class IBrain : MonoBehaviour
     public int Health = 100;
     private AudioClip footStepAudio;
 
+    private float m_fleeTriggerDistance = 12f;
+    private float m_fleeSafeDistance = 20f;
+
     //[Header("Target info")]
     private GameObject Target;
     private Vector3 TargetPosition;
@@ -90,31 +93,32 @@ public class IBrain : MonoBehaviour
         if (Type.Human == type)
             animator.SetBool("HumanMod", true);
 
-        Enemys = GameObject.FindGameObjectsWithTag("Enemy");
+        //Enemys = GameObject.FindGameObjectsWithTag("Enemy");
 
 
-        if (Mode.Chase == mode)
-        {
-            Target = GameObject.FindWithTag("Player");
-        }
+        //if (Mode.Chase == mode)
+        //{
+        //    Target = GameObject.FindWithTag("Player");
+        //}
 
-        if (Mode.Armed == mode)
-        {
-            Enemy = GameObject.FindWithTag("Enemy");
-            if (Enemy != null)
-                Target = GameObject.FindWithTag("Gun");
-        }
+        //if (Mode.Armed == mode)
+        //{
+        //    Enemy = GameObject.FindWithTag("Enemy");
+        //    if (Enemy != null)
+        //        Target = GameObject.FindWithTag("Gun");
+        //}
 
-        if (Mode.Random == mode)
-        {
-            random();
-        }
+        //if (Mode.Random == mode)
+        //{
+        //    random();
+        //}
 
-        // Source : https://www.youtube.com/watch?v=RGjMBEGhd7Y
-        if (Mode.Flee == mode)
-        {
-            RunAway();
-        }
+        //// Source : https://www.youtube.com/watch?v=RGjMBEGhd7Y
+        //if (Mode.Flee == mode)
+        //{
+        //    Debug.Log("Start flee mode");
+        //    RunAway();
+        //}
 
         if (FindWaypoint == true && !Waypoint && Mode.Waypoint == mode)
         {
@@ -180,41 +184,68 @@ public class IBrain : MonoBehaviour
     }
 
     // Source : https://www.youtube.com/watch?v=RGjMBEGhd7Y
-    void RunAway()
+    void CheckDistance()
     {
-        Vector3 distanceNPCvsBlob = (m_player.position - transform.position).normalized;
-        Debug.Log("Player position" + m_player.position);
-        //float magnitude = distanceNPCvsBlob.magnitude;
-        MoveToPos(transform.position - (distanceNPCvsBlob * 2f));
+        //Debug.Log("Run Away");
+        
+        float distanceNPCvsBlob = Vector3.Distance(m_player.position, transform.position);
+        //Debug.Log("Player position : " + m_player.position);
+        //Debug.Log("transform.position : " + transform.position);
+        //Debug.Log("Actual distance : " + distanceNPCvsBlob);
+        //Debug.Log("To be smaller  to run : ");
+        //Debug.Log("Flee trigger distance : " + m_fleeTriggerDistance);
+        if (distanceNPCvsBlob < m_fleeTriggerDistance)
+        {
+            Debug.Log("Running");
+            //float magnitude = distanceNPCvsBlob.magnitude;
+            Vector3 opositeDirection = (m_player.position - transform.position).normalized;
+            MoveToPos(transform.position - (opositeDirection));
+        }
+        else if (distanceNPCvsBlob > m_fleeSafeDistance)
+        {
+            Debug.Log("Walking");
+            Walking();
+        }
     }
 
     private void MoveToPos(Vector3 position)
     {
-        if (WaypointDistance < 1 || blocked)
-        {
+        //if (WaypointDistance < 1 || blocked)
+        //{
             //agent.SetDestination(position);
             TargetPosition = position;
             WaypointDistance = Vector3.Distance(TargetPosition, transform.position);
             speed = 10;
             SetDestinationTarget();
-        }
-        blocked = NavMesh.Raycast(transform.position, TargetPosition, out hit, NavMesh.AllAreas);
-        Debug.DrawLine(transform.position, TargetPosition, blocked ? Color.red : Color.green);
+        //}
+        //blocked = NavMesh.Raycast(transform.position, TargetPosition, out hit, NavMesh.AllAreas);
+        //Debug.DrawLine(transform.position, TargetPosition, blocked ? Color.red : Color.green);
     }
 
+    void Walking()
+    {
+        if (WaypointDistance < 1 || blocked)
+        {
+            TargetPosition = new Vector3(UnityEngine.Random.Range(-AvatarRange, AvatarRange), 0, UnityEngine.Random.Range(-AvatarRange, AvatarRange));
+            WaypointDistance = Vector3.Distance(TargetPosition, transform.position);
+            speed = 1;
+            SetDestinationTarget();
+        }
+        blocked = NavMesh.Raycast(transform.position, TargetPosition, out hit, NavMesh.AllAreas);
+        //Debug.DrawLine(transform.position, TargetPosition, blocked ? Color.red : Color.green);
+    }
     void random()
     {
         if (WaypointDistance < 1 || blocked)
         {
             TargetPosition = new Vector3(UnityEngine.Random.Range(-AvatarRange, AvatarRange), 0, UnityEngine.Random.Range(-AvatarRange, AvatarRange));
             WaypointDistance = Vector3.Distance(TargetPosition, transform.position);
-            speed = 5;
+            speed = 1;
             SetDestinationTarget();
         }
         blocked = NavMesh.Raycast(transform.position, TargetPosition, out hit, NavMesh.AllAreas);
         Debug.DrawLine(transform.position, TargetPosition, blocked ? Color.red : Color.green);
     }
-
 
     protected void SetDestination()
     {
@@ -333,16 +364,18 @@ public class IBrain : MonoBehaviour
     {
         if (Health != 0)
         {
+            //Debug.Log("Health not 0");
             // Source : https://www.youtube.com/watch?v=RGjMBEGhd7Y
             if (Mode.Flee == mode)
             {
-                RunAway();
+                //Debug.Log("Check Distance");
+                CheckDistance();
             }
 
-            if (Mode.Random == mode)
-            {
-                random();
-            }
+            //if (Mode.Random == mode)
+            //{
+            //    random();
+            //}
 
 
             if (Mode.Waypoint == mode)

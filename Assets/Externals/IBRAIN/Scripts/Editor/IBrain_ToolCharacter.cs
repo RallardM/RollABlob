@@ -8,9 +8,9 @@ public class IBrain_ToolCharacter : EditorWindow
 	bool CloseAfterCreateCharacter = false;
 	//int m_AxlesCount = 2;
 	float m_Mass = 1;
-	float m_AxleStep = 2;
-	float m_AxleWidth = 2;
-	float m_AxleShift = -0.5f;
+	//float m_AxleStep = 2;
+	//float m_AxleWidth = 2;
+	//float m_AxleShift = -0.5f;
 	public GameObject obj = null;
 	public RuntimeAnimatorController Ani = null;
 
