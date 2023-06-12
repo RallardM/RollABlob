@@ -1,7 +1,6 @@
 // Source : https://www.youtube.com/watch?v=RGjMBEGhd7Y
 
 using UnityEngine;
-using System.Collections;
 using UnityEngine.AI;
 
 public class IBrain : MonoBehaviour
