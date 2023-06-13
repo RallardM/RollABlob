@@ -9,6 +9,7 @@ TagManager:
   - Movable
   - NPC
   - Eaten
+  - BloblAbsorb
   layers:
   - Default
   - TransparentFX
