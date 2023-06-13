@@ -4,7 +4,6 @@
 // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
 // Source : https://gamedevbeginner.com/the-right-way-to-lerp-in-unity-with-examples/
 
-using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -15,8 +14,8 @@ public class BlobAbsorb : MonoBehaviour
     private Vector3 m_playerInitialScale = Vector3.zero;
     //private float m_playerInitialVolume = 0.0f;
     private float m_assetMassToAdd = 0.0f;
-    private float m_npcMassMultiplier = 10000000;
-    private float m_propsMassMultiplier = 100000;
+    private float m_npcMassMultiplier   = 10000000;
+    private float m_propsMassMultiplier = 1000000;
     //private float m_playerInitialMass = 0.0f;
     private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
 
@@ -26,7 +25,6 @@ public class BlobAbsorb : MonoBehaviour
         // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
         m_playerTransform = transform.parent.transform;
         m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
-        
         m_playerInitialScale = GetPlayerLocalScale();
     }
 
@@ -37,19 +35,20 @@ public class BlobAbsorb : MonoBehaviour
         {
             other.gameObject.GetComponent<NavMeshAgent>().enabled = false;
             other.gameObject.GetComponent<IBrain>().enabled = false;
-            other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
-            //other.gameObject.GetComponent<Rigidbody>().useGravity = false;
+            other.gameObject.GetComponent<Rigidbody>().useGravity = false;
             m_assetMassToAdd += (other.gameObject.GetComponent<Rigidbody>().mass * m_npcMassMultiplier);
             other.gameObject.layer = LayerMask.NameToLayer("EatenAssets");
             other.gameObject.tag = "Eaten";
+            other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
         }
 
         if (other.gameObject.tag == "Movable")
         {
-            other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
+            other.gameObject.GetComponent<Rigidbody>().useGravity = false;
             m_assetMassToAdd += (other.gameObject.GetComponent<Rigidbody>().mass * m_propsMassMultiplier);
             other.gameObject.layer = LayerMask.NameToLayer("EatenAssets");
             other.gameObject.tag = "Eaten";
+            other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
         }
     }
 
@@ -118,6 +117,18 @@ public class BlobAbsorb : MonoBehaviour
         colliderWidth = m_playerMeshCollider.bounds.size.x;
         colliderDepth = m_playerMeshCollider.bounds.size.z;
         return new Vector3(colliderWidth, colliderHeight, colliderDepth);
+    }
+
+    public Vector3 GetPLayerSizeDifference()
+    {
+        Vector3 playerSizeDifference = new Vector3(0, 0, 0);
+
+        // Calculate the offset based on the difference between the player's initial and new size
+        playerSizeDifference.x = 0.0f;
+        playerSizeDifference.y = m_playerTransform.localScale.y / m_playerInitialScale.y;
+        playerSizeDifference.z = m_playerTransform.localScale.z / m_playerInitialScale.z;
+
+        return playerSizeDifference;
     }
 
     private Vector3 GetPlayerLocalScale()

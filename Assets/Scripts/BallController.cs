@@ -25,8 +25,9 @@ public class BallController : MonoBehaviour
     private CameraFollow m_cameraFollow;
     private Rigidbody m_ballRigidbody;
     private JellyMesh m_jellyMesh;
-    private Vector3 m_jumpDirection;
-    private Vector3 m_previousDirection;
+    private Vector3 m_jumpDirection = Vector3.zero;
+    private Vector3 m_previousDirection = Vector3.zero;
+    private Vector3 m_positionBeforeJump = Vector3.zero;
     private float m_initialSquashing;
     private float m_prepareJumpSquashing;
     private float m_midAirJumpStretching;
@@ -35,7 +36,7 @@ public class BallController : MonoBehaviour
     [SerializeField] private bool m_isGrounded = false;
 
     public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
-
+    public Vector3 PositionBeforeJump { get => m_positionBeforeJump; set => m_positionBeforeJump = value; }
     private void Awake()
     {
         m_thirdPersonCamera = transform.parent.Find("ThirdPersonCamera").gameObject.GetComponent<Camera>();
@@ -88,7 +89,7 @@ public class BallController : MonoBehaviour
         {
             //Debug.Log("Space is released");
             m_jellyMesh.m_squashing = m_initialSquashing;
-            m_cameraFollow.InitialRigidBodyPos = m_ballRigidbody.transform.position;
+            PositionBeforeJump = m_ballRigidbody.transform.position;
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             m_isGrounded = false;

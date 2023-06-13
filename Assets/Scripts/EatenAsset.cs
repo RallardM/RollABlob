@@ -3,17 +3,16 @@
 // Source : https://forum.unity.com/threads/need-to-change-a-transform-position-y-value-with-a-in-c-close-but-no-cigar.169050/
 // Source : https://answers.unity.com/questions/1936597/how-do-you-rotate-an-object-relative-to-another-wi.html
 
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class EatenAsset : MonoBehaviour
 {
-    GameObject m_playerNode;
-    BlobAbsorb m_blobAbsorb;
+    private Transform m_triggerOnlyCollider;
+    private GameObject m_playerBlob;
+    private BlobAbsorb m_blobAbsorb;
     private Vector3 distanceAssetVSPlayer;
     private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
-    private float m_safeDistanceBeforeBeingEaten = 1.5f;
+    //private float m_safeDistanceBeforeBeingEaten = 1.5f;
     private bool m_isBeingEaten = false;
     private bool m_isEaten = false;
 
@@ -22,8 +21,10 @@ public class EatenAsset : MonoBehaviour
 
     private void Awake()
     {
-        m_playerNode = GameObject.FindGameObjectWithTag("PlayerBlob");
-        m_blobAbsorb = m_playerNode.GetComponent<BlobAbsorb>();
+        m_playerBlob = GameObject.FindGameObjectWithTag("PlayerBlob");
+        GameObject triggerOnlyCollider = m_playerBlob.transform.Find("TriggerOnlyCollider").gameObject;
+        m_blobAbsorb = triggerOnlyCollider.GetComponent<BlobAbsorb>();
+
         float radius = 0.0f;
         float radiusSurface = 0.0f;
         float sphereVolume = 0.0f;
@@ -75,25 +76,25 @@ public class EatenAsset : MonoBehaviour
             // Source : https://forum.unity.com/threads/need-to-change-a-transform-position-y-value-with-a-in-c-close-but-no-cigar.169050/
             Vector3 assetPreviousPosition = transform.position;
             Quaternion assetPreviousRotation = transform.rotation;
-            distanceAssetVSPlayer = assetPreviousPosition - m_playerNode.transform.position;
+            distanceAssetVSPlayer = assetPreviousPosition - m_playerBlob.transform.position;
             IsBeingEaten = false;
             IsEaten = true;
-         }
+        }
         else if (IsEaten)
         {
             if (distanceAssetVSPlayer.magnitude > 0 || distanceAssetVSPlayer.magnitude < 0)
             {
                 distanceAssetVSPlayer = Vector3.Lerp(distanceAssetVSPlayer, Vector3.zero, Time.fixedDeltaTime / m_lerpSpeed);
-                transform.position = m_playerNode.transform.position + distanceAssetVSPlayer;
+                transform.position = m_playerBlob.transform.position + distanceAssetVSPlayer;
                 // Source : https://answers.unity.com/questions/1936597/how-do-you-rotate-an-object-relative-to-another-wi.html
                 transform.rotation = transform.rotation * Quaternion.Euler(distanceAssetVSPlayer);
             }
 
             Vector3 currentPlayerSize = m_blobAbsorb.GetPlayerNewSize();
-            float playerAssetDistance = Vector3.Distance(transform.position, m_playerNode.transform.position);
+            float playerAssetDistance = Vector3.Distance(transform.position, m_playerBlob.transform.position);
             if (playerAssetDistance > currentPlayerSize.x)
             {
-                transform.position = Vector3.Lerp(transform.position, m_playerNode.transform.position, Time.fixedDeltaTime / m_lerpSpeed);
+                transform.position = Vector3.Lerp(transform.position, m_playerBlob.transform.position, Time.fixedDeltaTime / m_lerpSpeed);
             }
         }
     }

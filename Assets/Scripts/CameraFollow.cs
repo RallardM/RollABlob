@@ -1,6 +1,7 @@
 // Source : https://forum.unity.com/threads/how-to-get-pitch-and-yaw-of-goal-position-for-camera-orbit-solved.417644/
 // Source : https://youtu.be/sNmeK3qK7oA
 
+using System;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
@@ -10,33 +11,33 @@ public class CameraFollow : MonoBehaviour
     public float m_clampCamUp = 90f;
     public float m_clampCamDown = -80f;
 
-    private Rigidbody m_ballRigidbody;
     private Camera m_thirdPersonCamera;
+    private Rigidbody m_ballRigidbody;
+    private GameObject m_playerBlob;
     private BallController m_ballController;
+    private BlobAbsorb m_blobAbsorb;
     private Vector3 m_initialOffset = new Vector3(0, 2, -4);
     private Vector3 m_currentOffset = new Vector3(0, 2, -4);
     private Vector3 m_jumpingCameraOffset = new Vector3(0, 1, -5);
     private Vector3 m_currentRigidBodyPos;
     private Vector3 m_initialPlayerSize;
-    [SerializeField] private Vector3 m_initialRigidBodyPos;
     private float m_mouseX = 0f;
     private float m_mouseY = 0f;
-
-    public Vector3 InitialRigidBodyPos { get => m_initialRigidBodyPos; set => m_initialRigidBodyPos = value; }
 
     private void Awake()
     {
         m_thirdPersonCamera = GetComponent<Camera>();
-        m_ballRigidbody = transform.parent.Find("PlayerBlob").gameObject.GetComponent<Rigidbody>();
+        m_playerBlob = transform.parent.Find("PlayerBlob").gameObject;
+        m_ballRigidbody = m_playerBlob.GetComponent<Rigidbody>();
         m_ballController = m_ballRigidbody.GetComponent<BallController>();
+
+        m_blobAbsorb = m_playerBlob.GetComponentInChildren<BlobAbsorb>();
         m_initialPlayerSize = m_ballRigidbody.transform.localScale;
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
-        Vector3 playerSizeDifference = new Vector3(0, 0, 0);
-
         // Calculate mouse rotations
         m_mouseX += m_mouseSensitivity * Input.GetAxis("Mouse X");
         m_mouseY -= m_mouseSensitivity * Input.GetAxis("Mouse Y");
@@ -47,21 +48,16 @@ public class CameraFollow : MonoBehaviour
         // Calculate the rotation based on the X and Y
         Quaternion rotation = Quaternion.Euler(m_mouseY, m_mouseX, 0f);
 
-        // Calculate the offset based on the difference between the player's initial and new size
-        playerSizeDifference.y = m_ballRigidbody.transform.localScale.y / m_initialPlayerSize.y;
-        playerSizeDifference.z = m_ballRigidbody.transform.localScale.z / m_initialPlayerSize.z;
+        Vector3 playerSizeDiff = m_blobAbsorb.GetPLayerSizeDifference();
 
-        //Debug.Log("Player size different: " + playerSizeDifferent);
-        //Debug.Log("Initial offset: " + m_initialOffset);
-
-        if (playerSizeDifference.y > 0f)
+        if (playerSizeDiff.y > 0f && m_currentOffset.y < m_initialOffset.y * playerSizeDiff.y)
         {
             //Debug.Log("Player size different: " + playerSizeDifference);
             //Debug.Log("Camera current offset before: " + m_currentOffset);
-            m_currentOffset.y = m_initialOffset.y * playerSizeDifference.y;
-            m_currentOffset.z = m_initialOffset.z * playerSizeDifference.z;
+            m_currentOffset.y = m_initialOffset.y * playerSizeDiff.y;
+            m_currentOffset.z = m_initialOffset.z * playerSizeDiff.z;
             //Debug.Log("Camera current offset after: " + m_currentOffset);
-            playerSizeDifference = new Vector3(0, 0, 0);
+            //playerSizeDiff = new Vector3(0, 0, 0);
         }
 
         // Get the desired position for the camera
@@ -73,15 +69,19 @@ public class CameraFollow : MonoBehaviour
         transform.position = desiredPosition;
         transform.LookAt(m_ballRigidbody.position);
 
-        float currentHeightDistance;
+        Vector3 playerSizeDifference = m_blobAbsorb.GetPLayerSizeDifference();
+        float currentJumpHeight;
         m_currentRigidBodyPos = m_ballRigidbody.transform.position;
-        currentHeightDistance = m_currentRigidBodyPos.y - m_initialRigidBodyPos.y;
-        if (!m_ballController.IsGrounded && currentHeightDistance > 0f)
+        currentJumpHeight = m_currentRigidBodyPos.y - m_ballController.PositionBeforeJump.y;
+        if (!m_ballController.IsGrounded && currentJumpHeight > 0f)
         {
             //Debug.Log("Player is in the air");
-            Vector3 totalOffset = m_currentOffset + m_jumpingCameraOffset;
-            totalOffset.y = totalOffset.y * (playerSizeDifference.y * 2);
-            totalOffset.z = totalOffset.z * (playerSizeDifference.z * 2);
+            Vector3 JumpingOffsetResized = Vector3.zero;
+            JumpingOffsetResized.y = m_jumpingCameraOffset.y * (currentJumpHeight);
+            JumpingOffsetResized.z = m_jumpingCameraOffset.z * (currentJumpHeight);
+            Vector3 totalOffset = m_currentOffset + JumpingOffsetResized;
+            //totalOffset.y = totalOffset.y * (playerSizeDifference.y * 10);
+            //totalOffset.z = totalOffset.z * (playerSizeDifference.z * 10);
             m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, totalOffset, Time.deltaTime);
         }
         else if (m_ballController.IsGrounded)
@@ -90,4 +90,6 @@ public class CameraFollow : MonoBehaviour
             m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, m_initialOffset, Time.deltaTime);
         }
     }
+
+
 }
