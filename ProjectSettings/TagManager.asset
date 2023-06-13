@@ -18,7 +18,7 @@ TagManager:
   - UI
   - PlayerBlob
   - NPCs
-  - BlobAbsorbable
+  - EatenAssets
   - MovableProps
   - 
   - 

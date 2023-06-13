@@ -1,20 +1,29 @@
 // Source : https://answers.unity.com/questions/1574465/error-cannot-convert-quaternion-to-vector3.html
+// Source : https://docs.unity3d.com/ScriptReference/Vector3.Distance.html
+// Source : https://forum.unity.com/threads/need-to-change-a-transform-position-y-value-with-a-in-c-close-but-no-cigar.169050/
+// Source : https://answers.unity.com/questions/1936597/how-do-you-rotate-an-object-relative-to-another-wi.html
 
+using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class EatenAsset : MonoBehaviour
 {
     GameObject m_playerNode;
-    private float m_lerpSpeed = 2f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
-    private float m_safeDistanceBeforeBeingEaten = 1f;
+    BlobAbsorb m_blobAbsorb;
+    private Vector3 distanceAssetVSPlayer;
+    private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
+    private float m_safeDistanceBeforeBeingEaten = 1.5f;
     private bool m_isBeingEaten = false;
     private bool m_isEaten = false;
 
     public bool IsBeingEaten { get => m_isBeingEaten; set => m_isBeingEaten = value; }
+    public bool IsEaten { get => m_isEaten; set => m_isEaten = value; }
 
     private void Awake()
     {
         m_playerNode = GameObject.FindGameObjectWithTag("PlayerBlob");
+        m_blobAbsorb = m_playerNode.GetComponent<BlobAbsorb>();
         float radius = 0.0f;
         float radiusSurface = 0.0f;
         float sphereVolume = 0.0f;
@@ -22,14 +31,14 @@ public class EatenAsset : MonoBehaviour
         float colliderWidth = 0.0f;
         float colliderDepth = 0.0f;
         float colliderVolume = 0.0f;
-        
+
         // Checks what is the current object collider to assign it's mass based on its collider volume
         if (GetComponent<CapsuleCollider>())
         {
             radius = GetComponent<CapsuleCollider>().radius;
             colliderHeight = GetComponent<CapsuleCollider>().height;
             radiusSurface = (radius * radius) * Mathf.PI;
-            sphereVolume = ((radius * radius * radius) * Mathf.PI) * (4/3);
+            sphereVolume = ((radius * radius * radius) * Mathf.PI) * (4 / 3);
             colliderVolume = (radiusSurface * colliderHeight) + sphereVolume;
             GetComponent<Rigidbody>().mass = colliderVolume;
         }
@@ -60,27 +69,32 @@ public class EatenAsset : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (m_isBeingEaten)
+        if (IsBeingEaten && !IsEaten)
         {
-            //transform.position = Vector3.Lerp(transform.position, m_playerNode.transform.position, Time.fixedDeltaTime);
-            if (Vector3.Distance(transform.position, m_playerNode.transform.position) < m_safeDistanceBeforeBeingEaten)
+            // Source : https://docs.unity3d.com/ScriptReference/Vector3.Distance.html
+            // Source : https://forum.unity.com/threads/need-to-change-a-transform-position-y-value-with-a-in-c-close-but-no-cigar.169050/
+            Vector3 assetPreviousPosition = transform.position;
+            Quaternion assetPreviousRotation = transform.rotation;
+            distanceAssetVSPlayer = assetPreviousPosition - m_playerNode.transform.position;
+            IsBeingEaten = false;
+            IsEaten = true;
+         }
+        else if (IsEaten)
+        {
+            if (distanceAssetVSPlayer.magnitude > 0 || distanceAssetVSPlayer.magnitude < 0)
             {
-                m_isBeingEaten = false;
-                m_isEaten = true;
+                distanceAssetVSPlayer = Vector3.Lerp(distanceAssetVSPlayer, Vector3.zero, Time.fixedDeltaTime / m_lerpSpeed);
+                transform.position = m_playerNode.transform.position + distanceAssetVSPlayer;
+                // Source : https://answers.unity.com/questions/1936597/how-do-you-rotate-an-object-relative-to-another-wi.html
+                transform.rotation = transform.rotation * Quaternion.Euler(distanceAssetVSPlayer);
             }
-            else 
+
+            Vector3 currentPlayerSize = m_blobAbsorb.GetPlayerNewSize();
+            float playerAssetDistance = Vector3.Distance(transform.position, m_playerNode.transform.position);
+            if (playerAssetDistance > currentPlayerSize.x)
             {
                 transform.position = Vector3.Lerp(transform.position, m_playerNode.transform.position, Time.fixedDeltaTime / m_lerpSpeed);
-
-                // Source : https://answers.unity.com/questions/1574465/error-cannot-convert-quaternion-to-vector3.html
-                transform.rotation = Quaternion.Lerp(transform.rotation, m_playerNode.transform.rotation, Time.fixedDeltaTime / m_lerpSpeed);
             }
-        }
-
-        if (m_isEaten)
-        {
-            transform.position = m_playerNode.transform.position;
-            transform.rotation = m_playerNode.transform.rotation;
         }
     }
 }
