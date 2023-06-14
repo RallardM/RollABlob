@@ -137,7 +137,7 @@ public class IBrain : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Health--;
+        //Health--;
     }
 
     void OnTriggerEnter(Collider other)

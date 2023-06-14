@@ -14,14 +14,14 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - WallsFloors
+  - WallsAndFloors
   - Water
   - UI
   - PlayerBlob
   - NPCs
   - EatenAssets
   - MovableProps
-  - 
+  - Jumpable
   - 
   - 
   - 

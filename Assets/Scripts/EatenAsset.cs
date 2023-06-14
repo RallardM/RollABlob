@@ -7,12 +7,10 @@ using UnityEngine;
 
 public class EatenAsset : MonoBehaviour
 {
-    private Transform m_triggerOnlyCollider;
     private GameObject m_playerBlob;
     private BlobAbsorb m_blobAbsorb;
     private Vector3 distanceAssetVSPlayer;
     private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
-    //private float m_safeDistanceBeforeBeingEaten = 1.5f;
     private bool m_isBeingEaten = false;
     private bool m_isEaten = false;
 

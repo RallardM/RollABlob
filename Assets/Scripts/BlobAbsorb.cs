@@ -6,7 +6,6 @@
 
 using UnityEngine;
 using UnityEngine.AI;
-
 public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
@@ -21,7 +20,6 @@ public class BlobAbsorb : MonoBehaviour
 
     private void Awake()
     {
-
         // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
         m_playerTransform = transform.parent.transform;
         m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
@@ -30,7 +28,6 @@ public class BlobAbsorb : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        
         if (other.gameObject.tag == "NPC")
         {
             other.gameObject.GetComponent<NavMeshAgent>().enabled = false;
@@ -48,7 +45,10 @@ public class BlobAbsorb : MonoBehaviour
             m_assetMassToAdd += (other.gameObject.GetComponent<Rigidbody>().mass * m_propsMassMultiplier);
             other.gameObject.layer = LayerMask.NameToLayer("EatenAssets");
             other.gameObject.tag = "Eaten";
-            other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
+            if (other.gameObject.GetComponent<EatenAsset>() != null)
+            {
+                other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
+            }
         }
     }
 
