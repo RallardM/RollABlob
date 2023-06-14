@@ -22,8 +22,8 @@ TagManager:
   - EatenAssets
   - MovableProps
   - Jumpable
-  - 
-  - 
+  - BlobFullCollider
+  - HardProps
   - 
   - 
   - 
