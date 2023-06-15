@@ -29,9 +29,11 @@ public class BallController : MonoBehaviour
     private float m_lerpDuration = 3f;
     private float m_lerpElapsedTime;
     private const int JUMPABLE = 10;
-    [SerializeField] private bool m_isGrounded = false;
+    private bool m_isGrounded = false;
+    private bool m_isSquashing = false;
 
     public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
+    public bool IsSquashing { get => m_isSquashing; set => m_isSquashing = value; }
     public float HeightBeforeJump { get => m_heightBeforeJump; set => m_heightBeforeJump = value; }
     private void Awake()
     {
@@ -41,11 +43,11 @@ public class BallController : MonoBehaviour
         m_jellyMesh = GetComponent<JellyMesh>();
         m_initialSquashing = m_jellyMesh.m_squashing;
         m_prepareJumpSquashing = m_initialSquashing * 10f;
-        m_midAirJumpStretching = m_initialSquashing * -5f;
+        m_midAirJumpStretching = m_initialSquashing * -10f;
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
@@ -67,7 +69,41 @@ public class BallController : MonoBehaviour
         if (other.gameObject.layer == JUMPABLE)
         {
             //Debug.Log("Left the floor");
+            IsGrounded = false;
+        }
+    }
+
+    private void Update()
+    {
+        m_lerpElapsedTime += Time.deltaTime;
+        float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
+        if (IsGrounded && Input.GetKey(KeyCode.Space))
+        {
+            //Debug.Log("Space is pressed");
+            IsSquashing = true;
+            
+        }
+
+        if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
+        {
+            IsSquashing = false;
+            //Debug.Log("Space is released");
+            m_jellyMesh.m_squashing = m_initialSquashing;
+            HeightBeforeJump = m_ballRigidbody.transform.position.y;
+            //Debug.Log("Height before jump : " + HeightBeforeJump);
+            m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
+            Debug.Log("mid air squash : " + m_midAirJumpStretching);
+            m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Time.deltaTime);
             m_isGrounded = false;
+        }
+
+        if(IsSquashing)
+        {
+            m_jellyMesh.m_squashing = m_prepareJumpSquashing;
+        }
+        if (!IsSquashing || !(IsGrounded && (Input.GetKey(KeyCode.Space))))
+        {
+            m_jellyMesh.m_squashing = m_initialSquashing;
         }
     }
 
@@ -76,23 +112,6 @@ public class BallController : MonoBehaviour
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
-
-        if (m_isGrounded && Input.GetKeyDown(KeyCode.Space))
-        {
-            //Debug.Log("Space is pressed");
-            m_jellyMesh.m_squashing = m_prepareJumpSquashing;
-        }
-
-        if (m_isGrounded && Input.GetKeyUp(KeyCode.Space))
-        {
-            //Debug.Log("Space is released");
-            m_jellyMesh.m_squashing = m_initialSquashing;
-            HeightBeforeJump = m_ballRigidbody.transform.position.y;
-            //Debug.Log("Height before jump : " + HeightBeforeJump);
-            m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
-            m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
-            m_isGrounded = false;
-        }
 
         Vector3 direction = new Vector3();
         Vector3 lerpDirection = new Vector3();
