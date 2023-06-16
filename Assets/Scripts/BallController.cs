@@ -8,7 +8,6 @@
 // Source : https://stackoverflow.com/questions/5096926/what-is-the-get-set-syntax-in-c
 
 using UnityEngine;
-
 public class BallController : MonoBehaviour
 {
     public float m_speed = 10.0f;
@@ -94,7 +93,7 @@ public class BallController : MonoBehaviour
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             Debug.Log("m_initialSquashing : " + m_initialSquashing);
             Debug.Log("mid air squash : " + m_midAirJumpStretching);
-            float lerpedSquashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Time.deltaTime);
+            float lerpedSquashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             Debug.Log("lerpedSquashing : " + lerpedSquashing);
             m_jellyMesh.m_squashing = lerpedSquashing;
             m_isGrounded = false;
