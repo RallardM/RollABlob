@@ -21,6 +21,7 @@ public class BallController : MonoBehaviour
     private JellyMesh m_jellyMesh;
     private Vector3 m_jumpDirection = Vector3.zero;
     private Vector3 m_previousDirection = Vector3.zero;
+    //private Vector3 m_positionBeforeJump = Vector3.zero;
     private float m_heightBeforeJump = 0.0f;
     private float m_initialSquashing;
     private float m_prepareJumpSquashing;
@@ -34,6 +35,7 @@ public class BallController : MonoBehaviour
     public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
     public bool IsSquashing { get => m_isSquashing; set => m_isSquashing = value; }
     public float HeightBeforeJump { get => m_heightBeforeJump; set => m_heightBeforeJump = value; }
+    //public Vector3 PositionBeforeJump { get => m_positionBeforeJump; set => m_positionBeforeJump = value; }
     private void Awake()
     {
         m_thirdPersonCamera = transform.parent.Find("ThirdPersonCamera").gameObject.GetComponent<Camera>();
@@ -42,18 +44,34 @@ public class BallController : MonoBehaviour
         m_jellyMesh = GetComponent<JellyMesh>();
         m_initialSquashing = m_jellyMesh.m_squashing;
         m_prepareJumpSquashing = m_initialSquashing * 10f;
-        m_midAirJumpStretching = m_initialSquashing * -100f;
+        m_midAirJumpStretching = m_initialSquashing * -5f;
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
-    private void OnTriggerStay(Collider other)
+    //private void OnTriggerStay(Collider other)
+    //{
+    //    m_lerpElapsedTime += Time.fixedDeltaTime;
+    //    float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
+
+    //    if (other.gameObject.layer == JUMPABLE)
+    //    {
+    //        //Debug.Log("Floor is touched");
+    //        m_isGrounded = true;
+    //    }
+
+    //    if (m_jellyMesh.m_squashing != m_initialSquashing)
+    //    {
+    //        m_jellyMesh.m_squashing = m_initialSquashing;
+    //    }
+    //}
+
+    private void OnTriggerEnter(Collider other)
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
-        
+
         if (other.gameObject.layer == JUMPABLE)
         {
-            //Debug.Log("Floor is touched");
             m_isGrounded = true;
         }
 
@@ -72,48 +90,59 @@ public class BallController : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        m_lerpElapsedTime += Time.deltaTime;
-        float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
-        if (IsGrounded && Input.GetKey(KeyCode.Space))
-        {
-            //Debug.Log("Space is pressed");
-            IsSquashing = true;
+    //private void Update()
+    //{
+    //    m_lerpElapsedTime += Time.deltaTime;
+    //    float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
+    //    if (IsGrounded && Input.GetKey(KeyCode.Space))
+    //    {
+    //        //Debug.Log("Space is pressed");
+    //        IsSquashing = true;
             
-        }
+    //    }
 
-        if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
-        {
-            IsSquashing = false;
-            //Debug.Log("Space is released");
-            m_jellyMesh.m_squashing = m_initialSquashing;
-            HeightBeforeJump = m_ballRigidbody.transform.position.y;
-            //Debug.Log("Height before jump : " + HeightBeforeJump);
-            m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
-            Debug.Log("m_initialSquashing : " + m_initialSquashing);
-            Debug.Log("mid air squash : " + m_midAirJumpStretching);
-            float lerpedSquashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
-            Debug.Log("lerpedSquashing : " + lerpedSquashing);
-            m_jellyMesh.m_squashing = lerpedSquashing;
-            m_isGrounded = false;
-        }
+    //    if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
+    //    {
+    //        IsSquashing = false;
+    //        m_jellyMesh.m_squashing = m_initialSquashing;
+    //        HeightBeforeJump = m_ballRigidbody.transform.position.y;
+    //        m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
+    //        float lerpedSquashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
+    //        m_jellyMesh.m_squashing = lerpedSquashing;
+    //        m_isGrounded = false;
+    //    }
 
-        if(IsSquashing)
-        {
-            m_jellyMesh.m_squashing = m_prepareJumpSquashing;
-        }
-        if (!IsSquashing || !(IsGrounded && (Input.GetKey(KeyCode.Space))))
-        {
-            m_jellyMesh.m_squashing = m_initialSquashing;
-        }
-    }
+    //    if(IsSquashing)
+    //    {
+    //        m_jellyMesh.m_squashing = m_prepareJumpSquashing;
+    //    }
+    //    if (!IsSquashing || !(IsGrounded && (Input.GetKey(KeyCode.Space))))
+    //    {
+    //        m_jellyMesh.m_squashing = m_initialSquashing;
+    //    }
+    //}
 
     // Update is called once per frame
     void FixedUpdate()
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
+
+        if (m_isGrounded && Input.GetKeyDown(KeyCode.Space))
+        {
+            //Debug.Log("Space is pressed");
+            m_jellyMesh.m_squashing = m_prepareJumpSquashing;
+        }
+
+        if (m_isGrounded && Input.GetKeyUp(KeyCode.Space))
+        {
+            //Debug.Log("Space is released");
+            m_jellyMesh.m_squashing = m_initialSquashing;
+            HeightBeforeJump = m_ballRigidbody.transform.position.y;
+            m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
+            m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
+            m_isGrounded = false;
+        }
 
         Vector3 direction = new Vector3();
         Vector3 lerpDirection = new Vector3();
@@ -149,7 +178,6 @@ public class BallController : MonoBehaviour
         {
             return;
         }
-
         
         m_ballRigidbody.AddTorque(direction * m_torque * m_speed * GetIsShiftPressed() * Time.fixedDeltaTime, ForceMode.Force);
     }
