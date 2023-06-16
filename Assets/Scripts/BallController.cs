@@ -43,7 +43,7 @@ public class BallController : MonoBehaviour
         m_jellyMesh = GetComponent<JellyMesh>();
         m_initialSquashing = m_jellyMesh.m_squashing;
         m_prepareJumpSquashing = m_initialSquashing * 10f;
-        m_midAirJumpStretching = m_initialSquashing * -10f;
+        m_midAirJumpStretching = m_initialSquashing * -100f;
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
@@ -92,8 +92,11 @@ public class BallController : MonoBehaviour
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
             //Debug.Log("Height before jump : " + HeightBeforeJump);
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
+            Debug.Log("m_initialSquashing : " + m_initialSquashing);
             Debug.Log("mid air squash : " + m_midAirJumpStretching);
-            m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Time.deltaTime);
+            float lerpedSquashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Time.deltaTime);
+            Debug.Log("lerpedSquashing : " + lerpedSquashing);
+            m_jellyMesh.m_squashing = lerpedSquashing;
             m_isGrounded = false;
         }
 
