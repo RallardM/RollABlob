@@ -1,10 +1,6 @@
-// Source : https://youtu.be/Gin9nVJ2nYc
 // Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
-// Source : https://youtu.be/XYJpDig5s6U
-// Source : https://youtu.be/ORD7gsuLivE
 // Source : https://stackoverflow.com/questions/58377170/how-to-jump-in-unity-3d
-// Source : https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
-// Source : https://youtu.be/MyVY-y_jK1I
+
 // Source : https://stackoverflow.com/questions/5096926/what-is-the-get-set-syntax-in-c
 
 using UnityEngine;
@@ -18,31 +14,25 @@ public class BallController : MonoBehaviour
     private Camera m_thirdPersonCamera;
     private Rigidbody m_ballRigidbody;
     private JellyMesh m_jellyMesh;
-    private BlobAbsorb m_blobAbsorb;
     private Vector3 m_jumpDirection = Vector3.zero;
-    private Vector3 m_previousDirection = Vector3.zero;
     private float m_heightBeforeJump = 0.0f;
-    private float m_currentPlayerHeight = 0.0f;
+    //private float m_currentPlayerHeight = 0.0f;
     private float m_initialSquashing;
     private float m_prepareJumpSquashing;
     private float m_midAirJumpStretching;
     private float m_lerpDuration = 3f;
     private float m_lerpElapsedTime;
-    private const int JUMPABLE = 10;
     private bool m_isGrounded = false;
-    private bool m_isSquashing = false;
+    //private bool m_isSquashing = false;
 
     public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
-    public bool IsSquashing { get => m_isSquashing; set => m_isSquashing = value; }
     public float HeightBeforeJump { get => m_heightBeforeJump; set => m_heightBeforeJump = value; }
-    public float CurrentPlayerHeight { get => m_currentPlayerHeight; set => m_currentPlayerHeight = value; }
 
     private void Awake()
     {
         m_thirdPersonCamera = transform.parent.Find("ThirdPersonCamera").gameObject.GetComponent<Camera>();
         m_ballRigidbody = GetComponent<Rigidbody>();
         m_jellyMesh = GetComponent<JellyMesh>();
-        m_blobAbsorb = m_ballRigidbody.GetComponentInChildren<BlobAbsorb>();
         m_initialSquashing = m_jellyMesh.m_squashing;
         m_prepareJumpSquashing = m_initialSquashing * 5.0f;
         m_midAirJumpStretching = m_initialSquashing * -5.0f;
@@ -53,13 +43,16 @@ public class BallController : MonoBehaviour
     // and not for each modular floor tile.
     private void OnTriggerEnter(Collider other)
     {
+        // Only applies if the player was in the air and is now hitting the ground.
         if (IsGrounded)
         {
             return;
         }
 
+        // Update the player state as grounded (touching the ground from jumping).
         IsGrounded = true;
 
+        // If (As) the player is still stretched from the jump-strech, we need to reset it.
         if (m_jellyMesh.m_squashing != m_initialSquashing)
         {
             m_jellyMesh.m_squashing = m_initialSquashing;
@@ -71,16 +64,19 @@ public class BallController : MonoBehaviour
         m_lerpElapsedTime += Time.fixedDeltaTime;
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
 
+        // If the player touches the ground and presses the space bar, we need to prepare the jump by squaching its blob body.
         if (IsGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
             m_jellyMesh.m_squashing = m_prepareJumpSquashing;
         }
 
+        // If the player is releasing the space bar as he is on the ground, it proceed to jump.
         if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
         {
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
             m_jellyMesh.m_squashing = m_initialSquashing;
+            // Source : https://stackoverflow.com/questions/58377170/how-to-jump-in-unity-3d
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             IsGrounded = false;
@@ -90,6 +86,7 @@ public class BallController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        // Source : Maxime Flageole and Alexandre Pipon
         m_lerpElapsedTime += Time.fixedDeltaTime;
 
         Vector3 direction = new Vector3();
@@ -114,17 +111,18 @@ public class BallController : MonoBehaviour
         if (direction.magnitude <= 0)
         {
             return;
-        }    
+        }
 
+        // Source: https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
         m_ballRigidbody.AddTorque(GetIsShiftPressed() * m_speed * m_torque * Time.fixedDeltaTime * direction, ForceMode.Force);
     }
 
+    // Is called at the add torque, if the player is pressing the shift key, it will increase the speed of the ball.
     private float GetIsShiftPressed()
     {
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            //Debug.Log("Shit hit");
-            return 1000f;
+            return 10000f;
         }
         return 1f;
     }

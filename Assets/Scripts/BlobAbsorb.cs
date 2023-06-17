@@ -1,22 +1,20 @@
 // Source : https://answers.unity.com/questions/37286/how-turn-off-the-mesh-collider.html
-// Source: https://forum.unity.com/threads/cuberoot.33513/
+// Source : https://forum.unity.com/threads/cuberoot.33513/
 // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
 // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
 // Source : https://gamedevbeginner.com/the-right-way-to-lerp-in-unity-with-examples/
 
 using UnityEngine;
 using UnityEngine.AI;
+
 public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
     private MeshCollider m_playerMeshCollider;
     private SphereCollider m_playerSphereCollider;
     private Vector3 m_playerInitialScale = Vector3.zero;
-    //private float m_playerInitialVolume = 0.0f;
     private float m_assetMassToAdd = 0.0f;
-    private float m_npcMassMultiplier   = 10000000;
-    private float m_propsMassMultiplier = 1000000;
-    //private float m_playerInitialMass = 0.0f;
+    private float m_massMultiplier   = 10000000;
     private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
 
     private void Awake()
@@ -30,81 +28,52 @@ public class BlobAbsorb : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // If the asset in contact with the player is a NPC,
+        // we need to disable its the attributes that make it interact physically with the world.
         if (other.gameObject.tag == "NPC")
         {
-            other.gameObject.GetComponent<NavMeshAgent>().enabled = false;
-            other.gameObject.GetComponent<IBrain>().enabled = false;
-            other.gameObject.GetComponent<Rigidbody>().useGravity = false;
-            m_assetMassToAdd += (other.gameObject.GetComponent<Rigidbody>().mass * m_npcMassMultiplier);
-            other.gameObject.layer = LayerMask.NameToLayer("EatenAssets");
-            other.gameObject.tag = "Eaten";
-            other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
+            DeactivateNPCPhysic(other);
+
+            CollectAssetMassToAddToPlayer(other);
+
+            ChangeLayerTag(other);
+
+            SetIsBeingEaten(other);
         }
 
+        // If the asset in contact with the player is a movable object,
+        // we need to disable its the attributes that make it interact physically with the world.
         if (other.gameObject.tag == "Movable")
         {
-            other.gameObject.GetComponent<Rigidbody>().useGravity = false;
-            m_assetMassToAdd += (other.gameObject.GetComponent<Rigidbody>().mass * m_propsMassMultiplier);
-            other.gameObject.layer = LayerMask.NameToLayer("EatenAssets");
-            other.gameObject.tag = "Eaten";
-            if (other.gameObject.GetComponent<EatenAsset>() != null)
-            {
-                other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
-            }
+            DeactivateObjectPhysic(other);
+
+            CollectAssetMassToAddToPlayer(other);
+
+            ChangeLayerTag(other);
+
+            SetIsBeingEaten(other);
         }
     }
 
     void FixedUpdate()
     {
-        //Debug.Log("Object mass to add : " + m_assetMassToAdd);
+        // If there is mass to add to the player
         if (m_assetMassToAdd > 0.0f)
         {
-            Vector3 previousPlayerSize = Vector3.zero;
-            Vector3 newPlayerSize = Vector3.zero;
-            Vector3 playerSizeVolumeDifference = Vector3.zero;
-            float newVolumeToAddToPLayer = 0.0f;
-            float massAddedToSubstract = 0.0f;
-
-            // Source: https://forum.unity.com/threads/cuberoot.33513/
-            // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
-            // Get the cube root of the added mass to get one of the lenght of the mass as a cube and add this length to the player's cubic lenghts
-            newVolumeToAddToPLayer = Mathf.Pow(m_assetMassToAdd, 1f / 3f);
-            //Debug.Log("New volume to add to player : " + newVolumeToAddToPLayer);
-            previousPlayerSize = GetPlayerLocalScale();
-
-            // Source : https://gamedevbeginner.com/the-right-way-to-lerp-in-unity-with-examples/
-            float xLerp = Mathf.Lerp(previousPlayerSize.x, previousPlayerSize.x + newVolumeToAddToPLayer, Time.fixedDeltaTime / m_lerpSpeed);
-            float yLerp = Mathf.Lerp(previousPlayerSize.y, previousPlayerSize.y + newVolumeToAddToPLayer, Time.fixedDeltaTime / m_lerpSpeed);
-            float zLerp = Mathf.Lerp(previousPlayerSize.z, previousPlayerSize.z + newVolumeToAddToPLayer, Time.fixedDeltaTime / m_lerpSpeed);
-
             // Resize the player scale to the lerping new scale
-            m_playerTransform.localScale = new Vector3(xLerp, yLerp, zLerp);
+            // Takes the mass from the eaten asset that was collected into m_assetMassToAdd
+            // and adds it to the player's scale
+            // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
+            m_playerTransform.localScale = GetAssetToPlayerAdditiveResize();
 
-            // Get the difference between the new player size and the initial player size
-            newPlayerSize = GetPlayerLocalScale();
-            //Debug.Log("New player size : " + newPlayerSize);
-            playerSizeVolumeDifference = newPlayerSize - m_playerInitialScale;
-            //Debug.Log("Player size volume difference : " + playerSizeVolumeDifference);
-            massAddedToSubstract = Mathf.Pow(playerSizeVolumeDifference.x, 3f);
-            //Debug.Log("Mass added to substract : " + massAddedToSubstract);
+            // Then substract the mass that was added to the player from the asset's mass collected in m_assetMassToAdd
+            // and return the mass that was substracted to see how much mass is left to add to the player
+            float massAddedToSubstract = SubstractNewlyAddedMass();
 
-            //Debug.Log("Object mass to add before substraction : " + m_assetMassToAdd);
-            if (m_assetMassToAdd > 0)
-            {
-                // Substract that difference to the mass to add
-                m_assetMassToAdd -= massAddedToSubstract;
-                //Debug.Log("Object mass to add after substraction : " + m_assetMassToAdd);
-                if (m_assetMassToAdd < 0)
-                {
-                    m_assetMassToAdd = 0;
-                }   
-            }
-
+            // If there is no more mass to add to the player update the player's mesh collider to the new player's scale
             if (massAddedToSubstract == 0.0f)
             {
-                // Update the player's mesh collider to the new scale
-                m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = null;
-                m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = m_playerTransform.GetComponent<MeshFilter>().mesh;
+                UpdatePlayerMesh();
             }
         }
     }
@@ -130,13 +99,126 @@ public class BlobAbsorb : MonoBehaviour
         return playerSizeDifference;
     }
 
-    public float GetPlayerCurrentRadius()
-    {
-        return m_playerSphereCollider.radius * GetPLayerSizeDifference().y;
-    }
-
     private Vector3 GetPlayerLocalScale()
     {
         return m_playerTransform.localScale;
+    }
+
+    private void DeactivateNPCPhysic(Collider other)
+    {
+        if (other.gameObject.GetComponent<NavMeshAgent>() == null)
+        {
+            return;
+        }
+
+        if (other.gameObject.GetComponent<IBrain>() == null)
+        {
+            return;
+        }
+
+        if (other.gameObject.GetComponent<Rigidbody>() == null)
+        {
+            return;
+        }
+
+        // Source: https://answers.unity.com/questions/37286/how-turn-off-the-mesh-collider.html
+        other.gameObject.GetComponent<NavMeshAgent>().enabled = false;
+
+        other.gameObject.GetComponent<IBrain>().enabled = false;
+
+        other.gameObject.GetComponent<Rigidbody>().useGravity = false;
+    }
+
+    private void DeactivateObjectPhysic(Collider other)
+    {
+        if (other.gameObject.GetComponent<Rigidbody>() == null)
+        {
+            return;
+        }
+
+        other.gameObject.GetComponent<Rigidbody>().useGravity = false;
+    }
+
+    private void CollectAssetMassToAddToPlayer(Collider other)
+    {
+        // Take the mass from that asset and add it to the mass to add to the player
+        m_assetMassToAdd += (other.gameObject.GetComponent<Rigidbody>().mass * m_massMultiplier);
+    }
+
+    private void ChangeLayerTag(Collider other)
+    {
+        // Change the layer of the asset to EatenAssets so it doesn't interact with the world anymore
+        other.gameObject.layer = LayerMask.NameToLayer("EatenAssets");
+        other.gameObject.tag = "Eaten";
+    }
+
+    private void SetIsBeingEaten(Collider other)
+    {
+        // Early return, if the asset has an EatenAsset component to avoid errors
+        if (other.gameObject.GetComponent<EatenAsset>() == null)
+        {
+            return;
+        }
+
+        other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
+    }
+
+    private float SubstractNewlyAddedMass()
+    {
+        // Get the difference between the new player size and the initial player size
+        Vector3 playerSizeVolumeDifference = GetPlayerLocalScale() - m_playerInitialScale;
+
+        // Since the player is the same size in both directions, we only need to take the X value of the difference
+        float adjustOverSubstraction = VerifyOverSubstraction(playerSizeVolumeDifference.x);
+
+        // Source : https://forum.unity.com/threads/cuberoot.33513/
+        // Cube that difference to get the volume to substract from the gathered mass from the eaten asset.
+        float massAddedToSubstract = Mathf.Pow(adjustOverSubstraction, 3f);
+
+        // Substract that difference to the mass to add
+        m_assetMassToAdd -= massAddedToSubstract;
+
+        // Readjust m_assetMassToAdd to 0.0f if the substaction goes under zero to avoid negative values
+        m_assetMassToAdd = VerifyOverSubstraction(m_assetMassToAdd);
+
+        return massAddedToSubstract;
+    }
+
+    private float VerifyOverSubstraction(float valueToCheck)
+    {
+        if (valueToCheck < 0)
+        {
+            return valueToCheck = 0;
+        }
+
+        return valueToCheck;
+    }
+
+    private float GetAddedMassCubeRoot()
+    {
+        // Source: https://forum.unity.com/threads/cuberoot.33513/
+        // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
+        // Get the cube root of the added mass to get one of the lenght of the mass as a cube and add this length to the player's cubic lenghts
+        return Mathf.Pow(m_assetMassToAdd, 1f / 3f);
+    }
+
+    private Vector3 GetAssetToPlayerAdditiveResize()
+    {
+        // Source : https://gamedevbeginner.com/the-right-way-to-lerp-in-unity-with-examples/
+        // Lerps the current player's scale to the new scale resulting from the added mass from the eaten asset.
+        float xLerp = Mathf.Lerp(GetPlayerLocalScale().x, GetPlayerLocalScale().x + GetAddedMassCubeRoot(), Time.fixedDeltaTime / m_lerpSpeed);
+        float yLerp = Mathf.Lerp(GetPlayerLocalScale().y, GetPlayerLocalScale().y + GetAddedMassCubeRoot(), Time.fixedDeltaTime / m_lerpSpeed);
+        float zLerp = Mathf.Lerp(GetPlayerLocalScale().z, GetPlayerLocalScale().z + GetAddedMassCubeRoot(), Time.fixedDeltaTime / m_lerpSpeed);
+
+        // Resize the player scale to the lerping new scale
+        // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
+        return new Vector3(xLerp, yLerp, zLerp);
+    }
+
+    private void UpdatePlayerMesh()
+    {
+        // Update the player's mesh collider to the new scale
+        m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = null;
+        m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = m_playerTransform.GetComponent<MeshFilter>().mesh;
     }
 }
