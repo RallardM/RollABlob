@@ -112,12 +112,9 @@ public class BlobAbsorb : MonoBehaviour
     public Vector3 GetPlayerNewSize()
     {
         // Source : https://docs.unity3d.com/ScriptReference/Collider-bounds.html
-        float colliderHeight = 0.0f;
-        float colliderWidth = 0.0f;
-        float colliderDepth = 0.0f;
-        colliderHeight = m_playerMeshCollider.bounds.size.y;
-        colliderWidth = m_playerMeshCollider.bounds.size.x;
-        colliderDepth = m_playerMeshCollider.bounds.size.z;
+        float colliderHeight = m_playerMeshCollider.bounds.size.y;
+        float colliderWidth = m_playerMeshCollider.bounds.size.x;
+        float colliderDepth = m_playerMeshCollider.bounds.size.z;
         return new Vector3(colliderWidth, colliderHeight, colliderDepth);
     }
 

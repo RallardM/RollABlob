@@ -44,8 +44,8 @@ public class BallController : MonoBehaviour
         m_jellyMesh = GetComponent<JellyMesh>();
         m_blobAbsorb = m_ballRigidbody.GetComponentInChildren<BlobAbsorb>();
         m_initialSquashing = m_jellyMesh.m_squashing;
-        m_prepareJumpSquashing = m_initialSquashing * 10f;
-        m_midAirJumpStretching = m_initialSquashing * -5f;
+        m_prepareJumpSquashing = m_initialSquashing * 5.0f;
+        m_midAirJumpStretching = m_initialSquashing * -5.0f;
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
@@ -73,22 +73,17 @@ public class BallController : MonoBehaviour
 
         if (IsGrounded && Input.GetKeyDown(KeyCode.Space))
         {
-            //Debug.Log("Space is pressed");
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
             m_jellyMesh.m_squashing = m_prepareJumpSquashing;
         }
 
         if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
         {
-            //Debug.Log("Space is released");
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
-            //Debug.Log("Space is released");
             m_jellyMesh.m_squashing = m_initialSquashing;
-
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             IsGrounded = false;
-            //Debug.Log("FixedUpdate IsGrounded: " + IsGrounded);
         }
     }
 
@@ -96,44 +91,32 @@ public class BallController : MonoBehaviour
     void FixedUpdate()
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;
-        //float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
 
         Vector3 direction = new Vector3();
-        //Vector3 lerpDirection = new Vector3();
+
         if (Input.GetKey(KeyCode.W))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(1, 0, 0);
-            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            //m_previousDirection = new Vector3(1, 0, 0);
         }
         if (Input.GetKey(KeyCode.A))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, 1);
-            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            //m_previousDirection = new Vector3(0, 0, 1);
         }
         if (Input.GetKey(KeyCode.S))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(-1, 0, 0);
-            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            //m_previousDirection = new Vector3(-1, 0, 0);
         }
         if (Input.GetKey(KeyCode.D))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, -1);
-            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            //m_previousDirection = new Vector3(0, 0, -1);
         }
-
-        //direction = Vector3.Lerp(lerpDirection, direction, m_lerpElapsedTime);
-        //lerpDirection.Normalize();
 
         if (direction.magnitude <= 0)
         {
             return;
-        }
-        
-        m_ballRigidbody.AddTorque(direction * m_torque * m_speed * GetIsShiftPressed() * Time.fixedDeltaTime, ForceMode.Force);
+        }    
+
+        m_ballRigidbody.AddTorque(GetIsShiftPressed() * m_speed * m_torque * Time.fixedDeltaTime * direction, ForceMode.Force);
     }
 
     private float GetIsShiftPressed()
