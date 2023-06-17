@@ -71,8 +71,8 @@ public class CameraFollow : MonoBehaviour
         {
             float reducedHeightDistance = jumpHeightDistance * 0.375f;
             m_jumpingCameraOffset = m_currentOffset;
-            m_jumpingCameraOffset.y *= Mathf.Clamp(Mathf.Abs(reducedHeightDistance), 0.0f, Mathf.Abs(reducedHeightDistance) * 2.0f);
-            m_jumpingCameraOffset.z *= Mathf.Clamp(Mathf.Abs(reducedHeightDistance), 0.0f, Mathf.Abs(reducedHeightDistance) * 2.0f);
+            m_jumpingCameraOffset.y *= Mathf.Clamp(Mathf.Abs(reducedHeightDistance), 0.0f, m_currentOffset.magnitude * 2.0f);
+            m_jumpingCameraOffset.z *= Mathf.Clamp(Mathf.Abs(reducedHeightDistance), 0.0f, m_currentOffset.magnitude * 2.0f);
             m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, m_jumpingCameraOffset, Time.deltaTime * m_lerpSpeed);
         }
         else if (m_ballController.IsGrounded)
