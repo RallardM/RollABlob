@@ -16,13 +16,13 @@ public class BallController : MonoBehaviour
     public float m_cameraJumpSpeed = 0.5f;
 
     private Camera m_thirdPersonCamera;
-    private CameraFollow m_cameraFollow;
     private Rigidbody m_ballRigidbody;
     private JellyMesh m_jellyMesh;
+    private BlobAbsorb m_blobAbsorb;
     private Vector3 m_jumpDirection = Vector3.zero;
     private Vector3 m_previousDirection = Vector3.zero;
-    //private Vector3 m_positionBeforeJump = Vector3.zero;
     private float m_heightBeforeJump = 0.0f;
+    private float m_currentPlayerHeight = 0.0f;
     private float m_initialSquashing;
     private float m_prepareJumpSquashing;
     private float m_midAirJumpStretching;
@@ -35,13 +35,14 @@ public class BallController : MonoBehaviour
     public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
     public bool IsSquashing { get => m_isSquashing; set => m_isSquashing = value; }
     public float HeightBeforeJump { get => m_heightBeforeJump; set => m_heightBeforeJump = value; }
-    //public Vector3 PositionBeforeJump { get => m_positionBeforeJump; set => m_positionBeforeJump = value; }
+    public float CurrentPlayerHeight { get => m_currentPlayerHeight; set => m_currentPlayerHeight = value; }
+
     private void Awake()
     {
         m_thirdPersonCamera = transform.parent.Find("ThirdPersonCamera").gameObject.GetComponent<Camera>();
-        m_cameraFollow = m_thirdPersonCamera.GetComponent<CameraFollow>();
         m_ballRigidbody = GetComponent<Rigidbody>();
         m_jellyMesh = GetComponent<JellyMesh>();
+        m_blobAbsorb = m_ballRigidbody.GetComponentInChildren<BlobAbsorb>();
         m_initialSquashing = m_jellyMesh.m_squashing;
         m_prepareJumpSquashing = m_initialSquashing * 10f;
         m_midAirJumpStretching = m_initialSquashing * -5f;
@@ -65,16 +66,45 @@ public class BallController : MonoBehaviour
     //    }
     //}
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
-        m_lerpElapsedTime += Time.fixedDeltaTime;
-        float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
+        //Debug.Log("OnTriggerStay");
 
-        if (other.gameObject.layer == JUMPABLE)
+        // If the object is not jumpable, return.
+        if (other.gameObject.layer != JUMPABLE)
         {
-            m_isGrounded = true;
+            //Debug.Log("OnTriggerStay");
+            return;
         }
 
+        // If the player is touching the current floor tile, return.
+        if (IsGrounded)
+        {
+            return;
+        }
+
+        CurrentPlayerHeight = m_ballRigidbody.transform.position.y;
+        Debug.Log("CurrentPlayerHeight: " + CurrentPlayerHeight);
+        float playerBallRadius = m_blobAbsorb.GetPlayerCurrentRadius();
+        //Debug.Log("playerBallRadius: " + playerBallRadius);
+        CurrentPlayerHeight -= playerBallRadius;
+        Debug.Log("CurrentHeight: " + CurrentPlayerHeight);
+        float colliderHeight = other.transform.position.y;
+        
+        //Debug.Log("colliderHeight: " + colliderHeight);
+
+        // If the player is in the threshold height of touching the current floor tile.
+        if (CurrentPlayerHeight >= colliderHeight && CurrentPlayerHeight + 0.03f <= colliderHeight)
+        {
+            //Debug.Log("Is on the floor");
+            IsGrounded = true;
+            Debug.Log("OnTriggerStay IsGrounded: " + IsGrounded);
+        }
+
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
         if (m_jellyMesh.m_squashing != m_initialSquashing)
         {
             m_jellyMesh.m_squashing = m_initialSquashing;
@@ -83,11 +113,34 @@ public class BallController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.layer == JUMPABLE)
+        // If the object is not jumpable, return.
+        if (other.gameObject.layer != JUMPABLE)
         {
-            //Debug.Log("Left the floor");
-            IsGrounded = false;
+            return;
         }
+
+        // If the player realesed jump (IsGrounded = false;) return.
+        //if (!IsGrounded) 
+        //{
+        //    return;
+        //}
+
+        CurrentPlayerHeight = m_ballRigidbody.transform.position.y;
+        //Debug.Log("CurrentPlayerHeight: " + CurrentPlayerHeight);
+        float playerBallRadius = GetComponent<MeshCollider>().bounds.size.y / 2;
+        CurrentPlayerHeight -= playerBallRadius;
+        float colliderHeight = other.transform.position.y;
+
+        if (CurrentPlayerHeight + 0.04f >= colliderHeight)
+        {
+            //Debug.Log("Is in the air");
+            IsGrounded = false;
+            //Debug.Log("OnTriggerExit IsGrounded: " + IsGrounded);
+            return;
+        }
+
+        //Debug.Log("Left the floor");
+        //IsGrounded = true;
     }
 
     //private void Update()
@@ -128,20 +181,24 @@ public class BallController : MonoBehaviour
         m_lerpElapsedTime += Time.fixedDeltaTime;
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
 
-        if (m_isGrounded && Input.GetKeyDown(KeyCode.Space))
+        if (IsGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             //Debug.Log("Space is pressed");
+            HeightBeforeJump = m_ballRigidbody.transform.position.y;
             m_jellyMesh.m_squashing = m_prepareJumpSquashing;
         }
 
-        if (m_isGrounded && Input.GetKeyUp(KeyCode.Space))
+        if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
         {
+            Debug.Log("Space is released");
+            HeightBeforeJump = m_ballRigidbody.transform.position.y;
             //Debug.Log("Space is released");
             m_jellyMesh.m_squashing = m_initialSquashing;
-            HeightBeforeJump = m_ballRigidbody.transform.position.y;
+            
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
-            m_isGrounded = false;
+            IsGrounded = false;
+            //Debug.Log("FixedUpdate IsGrounded: " + IsGrounded);
         }
 
         Vector3 direction = new Vector3();

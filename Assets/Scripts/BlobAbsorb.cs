@@ -10,6 +10,7 @@ public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
     private MeshCollider m_playerMeshCollider;
+    private SphereCollider m_playerSphereCollider;
     private Vector3 m_playerInitialScale = Vector3.zero;
     //private float m_playerInitialVolume = 0.0f;
     private float m_assetMassToAdd = 0.0f;
@@ -24,6 +25,7 @@ public class BlobAbsorb : MonoBehaviour
         m_playerTransform = transform.parent.transform;
         m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
         m_playerInitialScale = GetPlayerLocalScale();
+        m_playerSphereCollider = m_playerTransform.GetComponent<SphereCollider>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -129,6 +131,11 @@ public class BlobAbsorb : MonoBehaviour
         playerSizeDifference.z = m_playerTransform.localScale.z / m_playerInitialScale.z;
 
         return playerSizeDifference;
+    }
+
+    public float GetPlayerCurrentRadius()
+    {
+        return m_playerSphereCollider.radius * GetPLayerSizeDifference().y;
     }
 
     private Vector3 GetPlayerLocalScale()
