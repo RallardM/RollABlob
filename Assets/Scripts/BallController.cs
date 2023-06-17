@@ -49,134 +49,24 @@ public class BallController : MonoBehaviour
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
-    //private void OnTriggerStay(Collider other)
-    //{
-    //    m_lerpElapsedTime += Time.fixedDeltaTime;
-    //    float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
-
-    //    if (other.gameObject.layer == JUMPABLE)
-    //    {
-    //        //Debug.Log("Floor is touched");
-    //        m_isGrounded = true;
-    //    }
-
-    //    if (m_jellyMesh.m_squashing != m_initialSquashing)
-    //    {
-    //        m_jellyMesh.m_squashing = m_initialSquashing;
-    //    }
-    //}
-
-    private void OnTriggerStay(Collider other)
+    // Should only be handled when the player hit the floor after a jump.
+    // and not for each modular floor tile.
+    private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("OnTriggerStay");
-
-        // If the object is not jumpable, return.
-        if (other.gameObject.layer != JUMPABLE)
-        {
-            //Debug.Log("OnTriggerStay");
-            return;
-        }
-
-        // If the player is touching the current floor tile, return.
         if (IsGrounded)
         {
             return;
         }
 
-        CurrentPlayerHeight = m_ballRigidbody.transform.position.y;
-        Debug.Log("CurrentPlayerHeight: " + CurrentPlayerHeight);
-        float playerBallRadius = m_blobAbsorb.GetPlayerCurrentRadius();
-        //Debug.Log("playerBallRadius: " + playerBallRadius);
-        CurrentPlayerHeight -= playerBallRadius;
-        Debug.Log("CurrentHeight: " + CurrentPlayerHeight);
-        float colliderHeight = other.transform.position.y;
-        
-        //Debug.Log("colliderHeight: " + colliderHeight);
+        IsGrounded = true;
 
-        // If the player is in the threshold height of touching the current floor tile.
-        if (CurrentPlayerHeight >= colliderHeight && CurrentPlayerHeight + 0.03f <= colliderHeight)
-        {
-            //Debug.Log("Is on the floor");
-            IsGrounded = true;
-            Debug.Log("OnTriggerStay IsGrounded: " + IsGrounded);
-        }
-
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
         if (m_jellyMesh.m_squashing != m_initialSquashing)
         {
             m_jellyMesh.m_squashing = m_initialSquashing;
         }
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        // If the object is not jumpable, return.
-        if (other.gameObject.layer != JUMPABLE)
-        {
-            return;
-        }
-
-        // If the player realesed jump (IsGrounded = false;) return.
-        //if (!IsGrounded) 
-        //{
-        //    return;
-        //}
-
-        CurrentPlayerHeight = m_ballRigidbody.transform.position.y;
-        //Debug.Log("CurrentPlayerHeight: " + CurrentPlayerHeight);
-        float playerBallRadius = GetComponent<MeshCollider>().bounds.size.y / 2;
-        CurrentPlayerHeight -= playerBallRadius;
-        float colliderHeight = other.transform.position.y;
-
-        if (CurrentPlayerHeight + 0.04f >= colliderHeight)
-        {
-            //Debug.Log("Is in the air");
-            IsGrounded = false;
-            //Debug.Log("OnTriggerExit IsGrounded: " + IsGrounded);
-            return;
-        }
-
-        //Debug.Log("Left the floor");
-        //IsGrounded = true;
-    }
-
-    //private void Update()
-    //{
-    //    m_lerpElapsedTime += Time.deltaTime;
-    //    float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
-    //    if (IsGrounded && Input.GetKey(KeyCode.Space))
-    //    {
-    //        //Debug.Log("Space is pressed");
-    //        IsSquashing = true;
-            
-    //    }
-
-    //    if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
-    //    {
-    //        IsSquashing = false;
-    //        m_jellyMesh.m_squashing = m_initialSquashing;
-    //        HeightBeforeJump = m_ballRigidbody.transform.position.y;
-    //        m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
-    //        float lerpedSquashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
-    //        m_jellyMesh.m_squashing = lerpedSquashing;
-    //        m_isGrounded = false;
-    //    }
-
-    //    if(IsSquashing)
-    //    {
-    //        m_jellyMesh.m_squashing = m_prepareJumpSquashing;
-    //    }
-    //    if (!IsSquashing || !(IsGrounded && (Input.GetKey(KeyCode.Space))))
-    //    {
-    //        m_jellyMesh.m_squashing = m_initialSquashing;
-    //    }
-    //}
-
-    // Update is called once per frame
-    void FixedUpdate()
+    private void Update()
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
@@ -190,46 +80,53 @@ public class BallController : MonoBehaviour
 
         if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
         {
-            Debug.Log("Space is released");
+            //Debug.Log("Space is released");
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
             //Debug.Log("Space is released");
             m_jellyMesh.m_squashing = m_initialSquashing;
-            
+
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             IsGrounded = false;
             //Debug.Log("FixedUpdate IsGrounded: " + IsGrounded);
         }
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        m_lerpElapsedTime += Time.fixedDeltaTime;
+        //float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
 
         Vector3 direction = new Vector3();
-        Vector3 lerpDirection = new Vector3();
+        //Vector3 lerpDirection = new Vector3();
         if (Input.GetKey(KeyCode.W))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(1, 0, 0);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            m_previousDirection = new Vector3(1, 0, 0);
+            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            //m_previousDirection = new Vector3(1, 0, 0);
         }
         if (Input.GetKey(KeyCode.A))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, 1);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            m_previousDirection = new Vector3(0, 0, 1);
+            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            //m_previousDirection = new Vector3(0, 0, 1);
         }
         if (Input.GetKey(KeyCode.S))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(-1, 0, 0);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            m_previousDirection = new Vector3(-1, 0, 0);
+            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            //m_previousDirection = new Vector3(-1, 0, 0);
         }
         if (Input.GetKey(KeyCode.D))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, -1);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
-            m_previousDirection = new Vector3(0, 0, -1);
+            //lerpDirection = Vector3.Lerp(m_previousDirection, direction, m_lerpElapsedTime);
+            //m_previousDirection = new Vector3(0, 0, -1);
         }
 
-        direction = Vector3.Lerp(lerpDirection, direction, m_lerpElapsedTime);
-        direction.Normalize();
+        //direction = Vector3.Lerp(lerpDirection, direction, m_lerpElapsedTime);
+        //lerpDirection.Normalize();
 
         if (direction.magnitude <= 0)
         {
