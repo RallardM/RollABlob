@@ -4,6 +4,7 @@
 // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
 // Source : https://gamedevbeginner.com/the-right-way-to-lerp-in-unity-with-examples/
 
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -13,6 +14,7 @@ public class BlobAbsorb : MonoBehaviour
     private MeshCollider m_playerMeshCollider;
     private SphereCollider m_playerSphereCollider;
     private Vector3 m_playerInitialScale = Vector3.zero;
+    private Vector3 m_playerCurrentSize = Vector3.zero;
     private float m_assetMassToAdd = 0.0f;
     private float m_massMultiplier   = 10000000;
     private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
@@ -28,6 +30,7 @@ public class BlobAbsorb : MonoBehaviour
         m_playerTransform = transform.parent.transform;
         m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
         m_playerInitialScale = GetPlayerLocalScale();
+        m_playerCurrentSize = m_playerInitialScale;
         m_playerSphereCollider = m_playerTransform.GetComponent<SphereCollider>();
     }
 
@@ -54,6 +57,14 @@ public class BlobAbsorb : MonoBehaviour
             {
                 return;
             }
+
+            DeactivateObjectPhysic(other);
+
+            CollectAssetMassToAddToPlayer(other);
+
+            ChangeLayerTag(other);
+
+            SetIsBeingEaten(other);
         }
     }
 
@@ -71,15 +82,20 @@ public class BlobAbsorb : MonoBehaviour
 
             // Then substract the mass that was added to the player from the asset's mass collected in m_assetMassToAdd
             // and return the mass that was substracted to see how much mass is left to add to the player
-            float massAddedToSubstract = SubstractNewlyAddedMass();
-
+            SubstractNewlyAddedMass();
             // If there is no more mass to add to the player update the player's mesh collider to the new player's scale
-            if (massAddedToSubstract == 0.0f)
+            if (m_assetMassToAdd == 0.0f)
             {
-                UpdatePlayerMesh();
+                //UpdatePlayerMesh();
+                UpdateCurrentPlayerSizeValue();
                 PlayerIsResizing = false;
             }
         }
+    }
+
+    private void UpdateCurrentPlayerSizeValue()
+    {
+        m_playerCurrentSize = m_playerTransform.localScale;
     }
 
     public Vector3 GetPlayerNewSize()
@@ -96,9 +112,9 @@ public class BlobAbsorb : MonoBehaviour
         Vector3 playerSizeDifference = new Vector3(0, 0, 0);
 
         // Calculate the offset based on the difference between the player's initial and new size
-        playerSizeDifference.x = m_playerTransform.localScale.x / m_playerInitialScale.x;
-        playerSizeDifference.y = m_playerTransform.localScale.y / m_playerInitialScale.y;
-        playerSizeDifference.z = m_playerTransform.localScale.z / m_playerInitialScale.z;
+        playerSizeDifference.x = m_playerTransform.localScale.x / m_playerCurrentSize.x;
+        playerSizeDifference.y = m_playerTransform.localScale.y / m_playerCurrentSize.y;
+        playerSizeDifference.z = m_playerTransform.localScale.z / m_playerCurrentSize.z;
 
         return playerSizeDifference;
     }
@@ -172,10 +188,10 @@ public class BlobAbsorb : MonoBehaviour
         other.gameObject.GetComponent<EatenAsset>().IsBeingEaten = true;
     }
 
-    private float SubstractNewlyAddedMass()
+    private void SubstractNewlyAddedMass()
     {
         // Get the difference between the new player size and the initial player size
-        Vector3 playerSizeVolumeDifference = GetPlayerLocalScale() - m_playerInitialScale;
+        Vector3 playerSizeVolumeDifference = GetPlayerLocalScale() - m_playerCurrentSize;
 
         // Since the player is the same size in both directions, we only need to take the X value of the difference
         float adjustOverSubstraction = VerifyOverSubstraction(playerSizeVolumeDifference.x);
@@ -189,8 +205,6 @@ public class BlobAbsorb : MonoBehaviour
 
         // Readjust m_assetMassToAdd to 0.0f if the substaction goes under zero to avoid negative values
         m_assetMassToAdd = VerifyOverSubstraction(m_assetMassToAdd);
-
-        return massAddedToSubstract;
     }
 
     private float VerifyOverSubstraction(float valueToCheck)
