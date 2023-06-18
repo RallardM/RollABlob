@@ -52,16 +52,17 @@ public class CameraFollow : MonoBehaviour
             // so the camera does not stay too close to the player as the player grows
             SetNewCamPosFromPlayerResize();
         }
-        else if (!m_blobAbsorb.PlayerIsResizing && m_cameraOffsetToAdd.magnitude > 0.0f)
+
+        //Debug.Log("is resizing? : " + m_blobAbsorb.PlayerIsResizing + " and player diff : " + m_blobAbsorb.GetInitialPLayerSizeDifference() + " >0");
+        if (!m_blobAbsorb.PlayerIsResizing && m_blobAbsorb.GetInitialPLayerSizeDifference() > 0.0f)
         {
-            Debug.Log("Update camera pos to accumulated player size");
+            //Debug.Log("Update camera pos to accumulated player size");
             UpdateNewCamPosFromPlayerResize();
         }
 
         // If the player is jumping
         if (m_ballController.IsJumping)
         {
-            
             // Update the camera jumping offset
             // so the player can see the surroundings while jumping
             UpdateCameraJumpingOffset();
@@ -89,16 +90,17 @@ public class CameraFollow : MonoBehaviour
         // Get the player size difference since the beginning of the game
         // so as we use it to offset the camera, the camera does not
         // stay too close to the player as the player grows
-        Vector3 playerSizeDiff = m_blobAbsorb.GetPLayerSizeDifference();
+        float playerSizeDiff = m_blobAbsorb.GetPLayerSizeDifference();
         //Debug.Log("Update camera pos to new player size");
         // If the player size difference is higher than 0 (the player has absorbed something)
-        if (playerSizeDiff.y > 1.0f)
+        if (playerSizeDiff > 0.0f)
         {
             //Debug.Log("Player size is diff : " + playerSizeDiff);
             //Debug.Log("Player size diff : " + playerSizeDiff);
-            m_cameraOffsetToAdd.y *= playerSizeDiff.y;
-            m_cameraOffsetToAdd.z *= playerSizeDiff.z;
+            m_cameraOffsetToAdd.y *= playerSizeDiff;
+            m_cameraOffsetToAdd.z *= playerSizeDiff;
         }
+        //Debug.Log("m_cameraOffsetToAdd : " + m_cameraOffsetToAdd);
     }
 
     private Vector3 GetMouseDesiredPos()

@@ -84,8 +84,11 @@ public class BlobAbsorb : MonoBehaviour
             // and return the mass that was substracted to see how much mass is left to add to the player
             SubstractNewlyAddedMass();
             // If there is no more mass to add to the player update the player's mesh collider to the new player's scale
+
+            //Debug.Log("m_assetMassToAdd " + m_assetMassToAdd);
             if (m_assetMassToAdd == 0.0f)
             {
+                Debug.Log("Player not resizing anymore");
                 //UpdatePlayerMesh();
                 UpdateCurrentPlayerSizeValue();
                 PlayerIsResizing = false;
@@ -107,14 +110,40 @@ public class BlobAbsorb : MonoBehaviour
         return new Vector3(colliderWidth, colliderHeight, colliderDepth);
     }
 
-    public Vector3 GetPLayerSizeDifference()
+    public float GetPLayerSizeDifference()
     {
-        Vector3 playerSizeDifference = new Vector3(0, 0, 0);
-
+        //Vector3 playerSizeDifference = new Vector3(0, 0, 0);
+        float playerSizeDifference = 0.0f;
+        //Debug.Log("localScale : " + m_playerTransform.localScale + " m_playerCurrentSize : " + m_playerCurrentSize);
         // Calculate the offset based on the difference between the player's initial and new size
-        playerSizeDifference.x = m_playerTransform.localScale.x / m_playerCurrentSize.x;
-        playerSizeDifference.y = m_playerTransform.localScale.y / m_playerCurrentSize.y;
-        playerSizeDifference.z = m_playerTransform.localScale.z / m_playerCurrentSize.z;
+        playerSizeDifference = m_playerTransform.localScale.x / m_playerCurrentSize.x;
+        //playerSizeDifference.y = m_playerTransform.localScale.y / m_playerCurrentSize.y;
+        //playerSizeDifference.z = m_playerTransform.localScale.z / m_playerCurrentSize.z;
+        //Debug.Log("playerSizeDifference : " + playerSizeDifference);  
+        
+        if(playerSizeDifference == 1.0f)
+        {
+            return 0.0f;
+        }
+
+        return playerSizeDifference;
+    }
+
+    public float GetInitialPLayerSizeDifference()
+    {
+        //Vector3 playerSizeDifference = new Vector3(0, 0, 0);
+        float playerSizeDifference = 0.0f;
+        //Debug.Log("localScale : " + m_playerTransform.localScale + " m_playerCurrentSize : " + m_playerCurrentSize);
+        // Calculate the offset based on the difference between the player's initial and new size
+        playerSizeDifference = m_playerTransform.localScale.x / m_playerInitialScale.x;
+        //playerSizeDifference.y = m_playerTransform.localScale.y / m_playerCurrentSize.y;
+        //playerSizeDifference.z = m_playerTransform.localScale.z / m_playerCurrentSize.z;
+        //Debug.Log("playerSizeDifference : " + playerSizeDifference);  
+
+        if (playerSizeDifference == 1.0f)
+        {
+            return 0.0f;
+        }
 
         return playerSizeDifference;
     }
