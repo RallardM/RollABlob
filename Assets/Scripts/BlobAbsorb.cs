@@ -16,6 +16,11 @@ public class BlobAbsorb : MonoBehaviour
     private float m_assetMassToAdd = 0.0f;
     private float m_massMultiplier   = 10000000;
     private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
+    private bool m_playerIsResizing = false;
+    private bool m_canAbsorbObjects = false;
+
+    public bool CanAbsorbObjects { get => m_canAbsorbObjects; set => m_canAbsorbObjects = value; }
+    public bool PlayerIsResizing { get => m_playerIsResizing; set => m_playerIsResizing = value; }
 
     private void Awake()
     {
@@ -45,13 +50,11 @@ public class BlobAbsorb : MonoBehaviour
         // we need to disable its the attributes that make it interact physically with the world.
         if (other.gameObject.tag == "Movable")
         {
-            DeactivateObjectPhysic(other);
-
-            CollectAssetMassToAddToPlayer(other);
-
-            ChangeLayerTag(other);
-
-            SetIsBeingEaten(other);
+            Debug.Log("Movable object in contact with player");
+            if (!CanAbsorbObjects)
+            {
+                return;
+            }
         }
     }
 
@@ -60,6 +63,7 @@ public class BlobAbsorb : MonoBehaviour
         // If there is mass to add to the player
         if (m_assetMassToAdd > 0.0f)
         {
+            PlayerIsResizing = true;
             // Resize the player scale to the lerping new scale
             // Takes the mass from the eaten asset that was collected into m_assetMassToAdd
             // and adds it to the player's scale
@@ -74,6 +78,7 @@ public class BlobAbsorb : MonoBehaviour
             if (massAddedToSubstract == 0.0f)
             {
                 UpdatePlayerMesh();
+                PlayerIsResizing = false;
             }
         }
     }
@@ -92,7 +97,7 @@ public class BlobAbsorb : MonoBehaviour
         Vector3 playerSizeDifference = new Vector3(0, 0, 0);
 
         // Calculate the offset based on the difference between the player's initial and new size
-        playerSizeDifference.x = 0.0f;
+        playerSizeDifference.x = m_playerTransform.localScale.x / m_playerInitialScale.x;
         playerSizeDifference.y = m_playerTransform.localScale.y / m_playerInitialScale.y;
         playerSizeDifference.z = m_playerTransform.localScale.z / m_playerInitialScale.z;
 
@@ -141,6 +146,11 @@ public class BlobAbsorb : MonoBehaviour
 
     private void CollectAssetMassToAddToPlayer(Collider other)
     {
+        if (other.gameObject.GetComponent<Rigidbody>() == null)
+        {
+            return;
+        }
+
         // Take the mass from that asset and add it to the mass to add to the player
         m_assetMassToAdd += (other.gameObject.GetComponent<Rigidbody>().mass * m_massMultiplier);
     }

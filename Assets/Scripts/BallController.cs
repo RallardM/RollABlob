@@ -16,16 +16,14 @@ public class BallController : MonoBehaviour
     private JellyMesh m_jellyMesh;
     private Vector3 m_jumpDirection = Vector3.zero;
     private float m_heightBeforeJump = 0.0f;
-    //private float m_currentPlayerHeight = 0.0f;
     private float m_initialSquashing;
     private float m_prepareJumpSquashing;
     private float m_midAirJumpStretching;
     private float m_lerpDuration = 3f;
     private float m_lerpElapsedTime;
     private bool m_isGrounded = false;
-    //private bool m_isSquashing = false;
 
-    public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
+    public bool IsJumping { get => m_isGrounded; set => m_isGrounded = value; }
     public float HeightBeforeJump { get => m_heightBeforeJump; set => m_heightBeforeJump = value; }
 
     private void Awake()
@@ -44,15 +42,16 @@ public class BallController : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // Only applies if the player was in the air and is now hitting the ground.
-        if (IsGrounded)
+        if (!IsJumping)
         {
             return;
         }
 
         // Update the player state as grounded (touching the ground from jumping).
-        IsGrounded = true;
+        IsJumping = false;
 
-        // If (As) the player is still stretched from the jump-strech, we need to reset it.
+        // As the player is still stretched from the jump-strech (reversed sqaush),
+        // we need to reset it.
         if (m_jellyMesh.m_squashing != m_initialSquashing)
         {
             m_jellyMesh.m_squashing = m_initialSquashing;
@@ -65,21 +64,21 @@ public class BallController : MonoBehaviour
         float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
 
         // If the player touches the ground and presses the space bar, we need to prepare the jump by squaching its blob body.
-        if (IsGrounded && Input.GetKeyDown(KeyCode.Space))
+        if (!IsJumping && Input.GetKeyDown(KeyCode.Space))
         {
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
             m_jellyMesh.m_squashing = m_prepareJumpSquashing;
         }
 
         // If the player is releasing the space bar as he is on the ground, it proceed to jump.
-        if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
+        if (!IsJumping && Input.GetKeyUp(KeyCode.Space))
         {
             HeightBeforeJump = m_ballRigidbody.transform.position.y;
             m_jellyMesh.m_squashing = m_initialSquashing;
             // Source : https://stackoverflow.com/questions/58377170/how-to-jump-in-unity-3d
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
-            IsGrounded = false;
+            IsJumping = true;
         }
     }
 
@@ -125,5 +124,10 @@ public class BallController : MonoBehaviour
             return 10000f;
         }
         return 1f;
+    }
+
+    public float GetJumpCurrentHeight()
+    {
+        return m_ballRigidbody.transform.position.y - HeightBeforeJump;
     }
 }
