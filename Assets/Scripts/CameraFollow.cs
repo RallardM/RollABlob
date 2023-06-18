@@ -18,10 +18,13 @@ public class CameraFollow : MonoBehaviour
     private BlobAbsorb m_blobAbsorb;
     private Vector3 m_groundedCameraOffset = new Vector3(0, 2, -4);
     private Vector3 m_currentOffset = new Vector3(0, 2, -4);
-    
+    private Vector3 m_resizingCamOfset = new Vector3(0, 2, -4);
     private float m_lerpSpeed = 1f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private float m_mouseX = 0f;
     private float m_mouseY = 0f;
+    private bool m_canUpdateOffsetToNewSize = false;
+
+    public bool CanUpdateOffsetToNewSize { get => m_canUpdateOffsetToNewSize; set => m_canUpdateOffsetToNewSize = value; }
 
     private void Awake()
     {
@@ -47,7 +50,7 @@ public class CameraFollow : MonoBehaviour
         transform.LookAt(m_ballRigidbody.position);
 
         // If the player is jumping
-        if (m_ballController.IsJumping && m_ballController.GetJumpCurrentHeight() > 2.0f)
+        if (m_ballController.IsJumping)
         {
             // Update the camera jumping offset
             // so the player can see the surroundings while jumping
@@ -70,9 +73,22 @@ public class CameraFollow : MonoBehaviour
         if (playerSizeDiff.y > 1.0f)
         {
             //Debug.Log("Player size diff : " + playerSizeDiff);
-            m_groundedCameraOffset.y *= playerSizeDiff.y;
-            m_groundedCameraOffset.z *= playerSizeDiff.z;
+            m_resizingCamOfset.y *= playerSizeDiff.y;
+            m_resizingCamOfset.z *= playerSizeDiff.z;
         }
+
+        if (!CanUpdateOffsetToNewSize)
+        {
+            return;
+        }
+
+        m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, m_resizingCamOfset, Time.deltaTime * m_lerpSpeed);
+        
+        if (m_currentOffset == m_resizingCamOfset)
+        {
+            CanUpdateOffsetToNewSize = false;
+        }
+
     }
 
     private Vector3 GetMouseDesiredPos()
@@ -94,13 +110,13 @@ public class CameraFollow : MonoBehaviour
     private void UpdateCameraJumpingOffset()
     {
         // Early return to prevents recursive assignation to m_currentOffset to go too high
-        //Debug.Log("currOff : " + m_currentOffset.magnitude + " > m_initOff*2 " + (m_groundedCameraOffset.magnitude * 2.0f));
+        Debug.Log("currOff : " + m_currentOffset.magnitude + " > m_initOff*2 : " + (m_groundedCameraOffset.magnitude * 2.0f));
         if (m_currentOffset.magnitude > (m_groundedCameraOffset.magnitude * 2.0f))
         {
-            //Debug.Log("m_currentOffset.magnitude is higher");
+            Debug.Log("m_currentOffset.magnitude is higher");
             return;
         }
-        //Debug.Log("m_currentOffset.magnitude is lower");
+        Debug.Log("m_currentOffset.magnitude is lower");
         //Debug.Log("currOff : " + m_currentOffset.magnitude + " > m_initOff*2 " + (m_groundedCameraOffset.magnitude * 2.0f));
         Vector3 jumpingCameraOffset = m_currentOffset * 2.0f;
         m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, jumpingCameraOffset, Time.deltaTime * m_lerpSpeed);

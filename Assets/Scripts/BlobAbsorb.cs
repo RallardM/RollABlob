@@ -10,8 +10,11 @@ using UnityEngine.AI;
 public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
+    private BallController m_ballController;
     private MeshCollider m_playerMeshCollider;
     private SphereCollider m_playerSphereCollider;
+    private Camera m_thirdPersonCamera;
+    private CameraFollow m_cameraFollow;
     private Vector3 m_playerInitialScale = Vector3.zero;
     private float m_assetMassToAdd = 0.0f;
     private float m_massMultiplier   = 10000000;
@@ -26,9 +29,12 @@ public class BlobAbsorb : MonoBehaviour
     {
         // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
         m_playerTransform = transform.parent.transform;
+        m_ballController = m_playerTransform.GetComponent<BallController>();
         m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
         m_playerInitialScale = GetPlayerLocalScale();
         m_playerSphereCollider = m_playerTransform.GetComponent<SphereCollider>();
+        m_thirdPersonCamera = transform.parent.Find("ThirdPersonCamera").gameObject.GetComponent<Camera>();
+        m_cameraFollow = m_thirdPersonCamera.GetComponent<CameraFollow>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -60,27 +66,41 @@ public class BlobAbsorb : MonoBehaviour
 
     void FixedUpdate()
     {
-        // If there is mass to add to the player
-        if (m_assetMassToAdd > 0.0f)
+        // Early return to only contunue if there is mass to add to the player
+        if (m_assetMassToAdd <= 0.0f)
         {
-            PlayerIsResizing = true;
-            // Resize the player scale to the lerping new scale
-            // Takes the mass from the eaten asset that was collected into m_assetMassToAdd
-            // and adds it to the player's scale
-            // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
-            m_playerTransform.localScale = GetAssetToPlayerAdditiveResize();
-
-            // Then substract the mass that was added to the player from the asset's mass collected in m_assetMassToAdd
-            // and return the mass that was substracted to see how much mass is left to add to the player
-            float massAddedToSubstract = SubstractNewlyAddedMass();
-
-            // If there is no more mass to add to the player update the player's mesh collider to the new player's scale
-            if (massAddedToSubstract == 0.0f)
-            {
-                UpdatePlayerMesh();
-                PlayerIsResizing = false;
-            }
+            return;
         }
+
+        PlayerIsResizing = true;
+        // Resize the player scale to the lerping new scale
+        // Takes the mass from the eaten asset that was collected into m_assetMassToAdd
+        // and adds it to the player's scale
+        // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
+        m_playerTransform.localScale = GetAssetToPlayerAdditiveResize();
+
+        // Then substract the mass that was added to the player from the asset's mass collected in m_assetMassToAdd
+        // and return the mass that was substracted to see how much mass is left to add to the player
+        float massAddedToSubstract = SubstractNewlyAddedMass();
+
+        // Continues if there is no more mass to add to the player 
+        if (massAddedToSubstract != 0.0f)
+        {
+            return;
+        }
+
+        // Updates the player's mesh collider to the new player's scale
+        UpdatePlayerMesh();
+        PlayerIsResizing = false;
+
+        // Continues if the player is not jumping to avoid recursing the camera offset while pressing jump
+        if (m_ballController.IsJumping)
+        {
+            return;
+        }
+
+        // Allows the camera to be offseted to the new player's scale
+        m_cameraFollow.CanUpdateOffsetToNewSize = true;
     }
 
     public Vector3 GetPlayerNewSize()
