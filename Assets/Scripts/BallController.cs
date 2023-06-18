@@ -1,14 +1,9 @@
-// Source : https://youtu.be/Gin9nVJ2nYc
 // Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
-// Source : https://youtu.be/XYJpDig5s6U
-// Source : https://youtu.be/ORD7gsuLivE
 // Source : https://stackoverflow.com/questions/58377170/how-to-jump-in-unity-3d
-// Source : https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
-// Source : https://youtu.be/MyVY-y_jK1I
+
 // Source : https://stackoverflow.com/questions/5096926/what-is-the-get-set-syntax-in-c
 
 using UnityEngine;
-
 public class BallController : MonoBehaviour
 {
     public float m_speed = 10.0f;
@@ -20,14 +15,17 @@ public class BallController : MonoBehaviour
     private Rigidbody m_ballRigidbody;
     private JellyMesh m_jellyMesh;
     private Vector3 m_jumpDirection = Vector3.zero;
-    private Vector3 m_previousDirection = Vector3.zero;
     private float m_heightBeforeJump = 0.0f;
-    private const int JUMPABLE = 10;
-    [SerializeField] private bool m_isGrounded = false;
-    
+    //private float m_currentPlayerHeight = 0.0f;
+    private float m_initialSquashing;
+    private float m_prepareJumpSquashing;
+    private float m_midAirJumpStretching;
+    private float m_lerpDuration = 3f;
+    private float m_lerpElapsedTime;
+    private bool m_isGrounded = false;
+    //private bool m_isSquashing = false;
 
     public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
-    
     public float HeightBeforeJump { get => m_heightBeforeJump; set => m_heightBeforeJump = value; }
 
     private void Awake()
@@ -35,97 +33,96 @@ public class BallController : MonoBehaviour
         m_thirdPersonCamera = transform.parent.Find("ThirdPersonCamera").gameObject.GetComponent<Camera>();
         m_ballRigidbody = GetComponent<Rigidbody>();
         m_jellyMesh = GetComponent<JellyMesh>();
+        m_initialSquashing = m_jellyMesh.m_squashing;
+        m_prepareJumpSquashing = m_initialSquashing * 5.0f;
+        m_midAirJumpStretching = m_initialSquashing * -5.0f;
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
-    private void OnTriggerStay(Collider other)
+    // Should only be handled when the player hit the floor after a jump.
+    // and not for each modular floor tile.
+    private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("Collided mesh" + other.name);
-        if (other.gameObject.layer == JUMPABLE)
+        // Only applies if the player was in the air and is now hitting the ground.
+        if (IsGrounded)
         {
-            m_isGrounded = true;
+            return;
         }
 
-        if (m_jellyMesh.m_squashing != m_jellyMesh.m_initialSquashing)
-        {
-            m_jellyMesh.m_squashing = m_jellyMesh.m_initialSquashing;
-        }
-    }
+        // Update the player state as grounded (touching the ground from jumping).
+        IsGrounded = true;
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.layer == JUMPABLE)
+        // If (As) the player is still stretched from the jump-strech, we need to reset it.
+        if (m_jellyMesh.m_squashing != m_initialSquashing)
         {
-            //Debug.Log("Left the floor");
-            IsGrounded = false;
+            m_jellyMesh.m_squashing = m_initialSquashing;
         }
     }
 
     private void Update()
     {
-        //Debug.Log("m_isGrounded : " + m_isGrounded);
-        //Debug.Log("Input.GetKeyDown(KeyCode.Space) : " + (Input.GetKeyDown(KeyCode.Space)));
+        m_lerpElapsedTime += Time.fixedDeltaTime;
+        float percentageComplete = m_lerpElapsedTime / m_lerpDuration;
 
-        if (IsGrounded && Input.GetKey(KeyCode.Space))
+        // If the player touches the ground and presses the space bar, we need to prepare the jump by squaching its blob body.
+        if (IsGrounded && Input.GetKeyDown(KeyCode.Space))
         {
-            //Debug.Log("Space is pressed");
-            m_jellyMesh.IsSquashing = true;
-            //m_jellyMesh.m_squashing = m_prepareJumpSquashing;
+            HeightBeforeJump = m_ballRigidbody.transform.position.y;
+            m_jellyMesh.m_squashing = m_prepareJumpSquashing;
         }
 
+        // If the player is releasing the space bar as he is on the ground, it proceed to jump.
         if (IsGrounded && Input.GetKeyUp(KeyCode.Space))
         {
-            m_jellyMesh.IsSquashing = false;
+            HeightBeforeJump = m_ballRigidbody.transform.position.y;
+            m_jellyMesh.m_squashing = m_initialSquashing;
+            // Source : https://stackoverflow.com/questions/58377170/how-to-jump-in-unity-3d
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
+            m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
+            IsGrounded = false;
         }
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        // Source : Maxime Flageole and Alexandre Pipon
+        m_lerpElapsedTime += Time.fixedDeltaTime;
+
         Vector3 direction = new Vector3();
-        Vector3 lerpDirection = new Vector3();
+
         if (Input.GetKey(KeyCode.W))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(1, 0, 0);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, Time.fixedDeltaTime);
-            m_previousDirection = new Vector3(1, 0, 0);
         }
         if (Input.GetKey(KeyCode.A))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, 1);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, Time.fixedDeltaTime);
-            m_previousDirection = new Vector3(0, 0, 1);
         }
         if (Input.GetKey(KeyCode.S))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(-1, 0, 0);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, Time.fixedDeltaTime);
-            m_previousDirection = new Vector3(-1, 0, 0);
         }
         if (Input.GetKey(KeyCode.D))
         {
             direction += m_thirdPersonCamera.transform.TransformDirection(0, 0, -1);
-            lerpDirection = Vector3.Lerp(m_previousDirection, direction, Time.fixedDeltaTime);
         }
-
-        direction = Vector3.Lerp(lerpDirection, direction, Time.fixedDeltaTime);
-        direction.Normalize();
 
         if (direction.magnitude <= 0)
         {
             return;
         }
-        
-        m_ballRigidbody.AddTorque(direction * m_torque * m_speed * GetIsShiftPressed() * Time.fixedDeltaTime, ForceMode.Force);
+
+        // Source: https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
+        m_ballRigidbody.AddTorque(GetIsShiftPressed() * m_speed * m_torque * Time.fixedDeltaTime * direction, ForceMode.Force);
     }
 
+    // Is called at the add torque, if the player is pressing the shift key, it will increase the speed of the ball.
     private float GetIsShiftPressed()
     {
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            //Debug.Log("Shit hit");
-            return 1000f;
+            return 10000f;
         }
         return 1f;
     }

@@ -83,9 +83,8 @@ public class EatenAsset : MonoBehaviour
             if (distanceAssetVSPlayer.magnitude > 0 || distanceAssetVSPlayer.magnitude < 0)
             {
                 distanceAssetVSPlayer = Vector3.Lerp(distanceAssetVSPlayer, Vector3.zero, Time.fixedDeltaTime / m_lerpSpeed);
-                transform.position = m_playerBlob.transform.position + distanceAssetVSPlayer;
                 // Source : https://answers.unity.com/questions/1936597/how-do-you-rotate-an-object-relative-to-another-wi.html
-                transform.rotation = transform.rotation * Quaternion.Euler(distanceAssetVSPlayer);
+                transform.SetPositionAndRotation(m_playerBlob.transform.position + distanceAssetVSPlayer, transform.rotation * Quaternion.Euler(distanceAssetVSPlayer));
             }
 
             Vector3 currentPlayerSize = m_blobAbsorb.GetPlayerNewSize();
