@@ -18,7 +18,7 @@ public class CameraFollow : MonoBehaviour
     private BlobAbsorb m_blobAbsorb;
     private Vector3 m_initialOffset = new Vector3(0, 2, -4);
     private Vector3 m_currentOffset = new Vector3(0, 2, -4);
-    private Vector3 m_jumpingCameraOffset = new Vector3(0, 0, 0);
+    //private Vector3 m_jumpingCameraOffset = new Vector3(0, 0, 0);
     private Vector3 m_currentRigidBodyPos;
     private float m_lerpSpeed = 1f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private float m_mouseX = 0f;
@@ -62,16 +62,16 @@ public class CameraFollow : MonoBehaviour
         // Get the player size difference since the beginning of the game
         // so as we use it to offset the camera, the camera does not
         // stay too close to the player as the player grows
-        Vector3 playerSizeDiff = m_blobAbsorb.GetPLayerSizeDifference();
+        float playerSizeDiff = m_blobAbsorb.GetPLayerSizeDifference();
 
         // Offsets the camera as the size of the player changes
         // If the player size difference is higher than 0 (the player has absorbed something)
         // and the current camera offset height is lower than
         // the initial camera offset height in ratio to the player size difference
-        if (playerSizeDiff.y > 0f && m_currentOffset.y < m_initialOffset.y * playerSizeDiff.y)
+        if (playerSizeDiff > 0f && m_currentOffset.y < m_initialOffset.y * playerSizeDiff)
         {
-            m_currentOffset.y = m_initialOffset.y * playerSizeDiff.y;
-            m_currentOffset.z = m_initialOffset.z * playerSizeDiff.z;
+            m_currentOffset.y = m_initialOffset.y * playerSizeDiff;
+            m_currentOffset.z = m_initialOffset.z * playerSizeDiff;
         }
     }
 
@@ -99,37 +99,50 @@ public class CameraFollow : MonoBehaviour
     private void UpdateCamJumpingOffset()
     {
         // Update the camera jumping offset to the possibly new current offset
-        m_jumpingCameraOffset = m_currentOffset;
+        Vector3 jumpingCameraOffset = m_currentOffset;
 
         // Use the jumping offset to offset the camera
         float camOffsetFromJump = Mathf.Abs(GetJumpHeight() * 0.375f);
-        //Debug.Log("camOffsetFromJump: " + camOffsetFromJump);
 
-        
+        jumpingCameraOffset.y *= camOffsetFromJump;
+        jumpingCameraOffset.z *= camOffsetFromJump;
+
+        if (jumpingCameraOffset.magnitude > m_initialOffset.magnitude * 5)
+        {
+            return;
+        }
 
         // Clamp the jumping camera offset to a maximum of 2 times the initial offset
-        m_jumpingCameraOffset.y *= Mathf.Clamp(camOffsetFromJump, 0.0f, camOffsetFromJump * 2.0f);
-        m_jumpingCameraOffset.z *= Mathf.Clamp(camOffsetFromJump, 0.0f, camOffsetFromJump * 2.0f);
-        //Debug.Log("m_jumpingCameraOffset: " + m_jumpingCameraOffset);
+        //m_jumpingCameraOffset.y *= Mathf.Clamp(camOffsetFromJump, 0.0f, camOffsetFromJump * 2.0f);
+        //m_jumpingCameraOffset.z *= Mathf.Clamp(camOffsetFromJump, 0.0f, camOffsetFromJump * 2.0f);
 
-        Vector3 clampCurrentOffset = new Vector3(0, 0, 0);
-        clampCurrentOffset.x *= Mathf.Clamp(m_currentOffset.x, 0.0f, m_currentOffset.x * 2.0f);
-        clampCurrentOffset.y *= Mathf.Clamp(m_currentOffset.y, 0.0f, m_currentOffset.y * 2.0f);
-        clampCurrentOffset.z *= Mathf.Clamp(m_currentOffset.z, 0.0f, m_currentOffset.z * 2.0f);
+        //Debug.Log("    camOffsetFromJump : " + camOffsetFromJump);
+        //Debug.Log("      m_currentOffset : " + m_currentOffset);
+        //Debug.Log("Jumping camera offset : " + m_jumpingCameraOffset);
 
-        Debug.Log("m_currentOffset.magnitude : " + m_currentOffset.magnitude);
-        Debug.Log("clampCurrentOffset: " + clampCurrentOffset.magnitude);
+        //Vector3 clampCurrentOffset = new Vector3(0, 0, 0);
+        //clampCurrentOffset.x *= Mathf.Clamp(m_currentOffset.x, 0.0f, m_currentOffset.x * 2.0f);
+        //clampCurrentOffset.y *= Mathf.Clamp(m_currentOffset.y, 0.0f, m_currentOffset.y * 2.0f);
+        //clampCurrentOffset.z *= Mathf.Clamp(m_currentOffset.z, 0.0f, m_currentOffset.z * 2.0f);
 
         // Update the current offset to the new jumping offset
-        m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, m_jumpingCameraOffset, Time.deltaTime * m_lerpSpeed);
+        m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, jumpingCameraOffset, Time.deltaTime * m_lerpSpeed);
     }
 
     private void ResetCameraPos()
     {
         // taking in account the player size difference
-        Vector3 intialAndNewPlayerSizeOffset = m_blobAbsorb.GetPLayerSizeDifference();
-        intialAndNewPlayerSizeOffset.y *= m_initialOffset.y;
-        intialAndNewPlayerSizeOffset.z *= m_initialOffset.z;
-        m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, intialAndNewPlayerSizeOffset, Time.deltaTime * m_lerpSpeed);
+        float intialPlayerSizeDiff = m_blobAbsorb.GetPLayerSizeDifference();
+        
+        if (intialPlayerSizeDiff == 0)
+        {
+            return;
+        }
+
+        Vector3 newPlayerSizeOffset = new Vector3(0, 0, 0);
+
+        newPlayerSizeOffset.y = intialPlayerSizeDiff * m_initialOffset.y;
+        newPlayerSizeOffset.z = intialPlayerSizeDiff * m_initialOffset.z;
+        m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, newPlayerSizeOffset, Time.deltaTime * m_lerpSpeed);
     }
 }

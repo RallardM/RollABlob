@@ -87,14 +87,17 @@ public class BlobAbsorb : MonoBehaviour
         return new Vector3(colliderWidth, colliderHeight, colliderDepth);
     }
 
-    public Vector3 GetPLayerSizeDifference()
+    public float GetPLayerSizeDifference()
     {
-        Vector3 playerSizeDifference = new Vector3(0, 0, 0);
+        float playerSizeDifference = 0.0f;
 
         // Calculate the offset based on the difference between the player's initial and new size
-        playerSizeDifference.x = 0.0f;
-        playerSizeDifference.y = m_playerTransform.localScale.y / m_playerInitialScale.y;
-        playerSizeDifference.z = m_playerTransform.localScale.z / m_playerInitialScale.z;
+        playerSizeDifference = m_playerTransform.localScale.y / m_playerInitialScale.y;
+
+        if (playerSizeDifference == 1.0f)
+        {
+            return 0.0f;
+        }
 
         return playerSizeDifference;
     }
