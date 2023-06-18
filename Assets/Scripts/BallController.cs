@@ -49,6 +49,7 @@ public class BallController : MonoBehaviour
 
         // Update the player state as grounded (touching the ground from jumping).
         IsJumping = false;
+        Debug.Log("Grounded");
 
         // As the player is still stretched from the jump-strech (reversed sqaush),
         // we need to reset it.
@@ -79,6 +80,7 @@ public class BallController : MonoBehaviour
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             IsJumping = true;
+            //Debug.Log("Jumping");
         }
     }
 

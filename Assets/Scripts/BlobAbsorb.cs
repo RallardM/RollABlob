@@ -50,7 +50,6 @@ public class BlobAbsorb : MonoBehaviour
         // we need to disable its the attributes that make it interact physically with the world.
         if (other.gameObject.tag == "Movable")
         {
-            Debug.Log("Movable object in contact with player");
             if (!CanAbsorbObjects)
             {
                 return;

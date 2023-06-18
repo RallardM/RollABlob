@@ -16,8 +16,11 @@ public class CameraFollow : MonoBehaviour
     private GameObject m_playerBlob;
     private BallController m_ballController;
     private BlobAbsorb m_blobAbsorb;
+    private Vector3 m_initialCameraOffset = new Vector3(0, 2, -4);
     private Vector3 m_groundedCameraOffset = new Vector3(0, 2, -4);
     private Vector3 m_currentOffset = new Vector3(0, 2, -4);
+    private float m_jumpCameraOffsetMultiplier = 2.0f;
+    private float m_jumpOffsetMaxMultiplier = 3.0f;
     
     private float m_lerpSpeed = 1f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private float m_mouseX = 0f;
@@ -35,6 +38,13 @@ public class CameraFollow : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
+        // Set the camera's position and rotation
+        //Debug.Log("transform.position : " + transform.position.magnitude);
+        //Debug.Log("GetMouseDesiredPos() : " + GetMouseDesiredPos().magnitude);
+
+        transform.position = Vector3.Lerp(transform.position, GetMouseDesiredPos(), m_smoothSpeed);
+        transform.LookAt(m_ballRigidbody.position);
+
         if (m_blobAbsorb.PlayerIsResizing)
         {
             // Update the camera position to the new player size
@@ -42,13 +52,10 @@ public class CameraFollow : MonoBehaviour
             UpdateCamPosToNewPlayerSize();
         }
 
-        // Set the camera's position and rotation
-        transform.position = Vector3.Lerp(transform.position, GetMouseDesiredPos(), m_smoothSpeed);
-        transform.LookAt(m_ballRigidbody.position);
-
         // If the player is jumping
-        if (m_ballController.IsJumping && m_ballController.GetJumpCurrentHeight() > 2.0f)
+        if (m_ballController.IsJumping)
         {
+            Debug.Log("IsJumping");
             // Update the camera jumping offset
             // so the player can see the surroundings while jumping
             UpdateCameraJumpingOffset();
@@ -88,29 +95,33 @@ public class CameraFollow : MonoBehaviour
         Quaternion rotation = Quaternion.Euler(m_mouseY, m_mouseX, 0f);
 
         // Get the desired position for the camera
-        return m_ballRigidbody.position + rotation * m_currentOffset;
+        Vector3 desiredPosition = m_ballRigidbody.position + rotation * m_currentOffset;
+
+        return desiredPosition;
     }
 
     private void UpdateCameraJumpingOffset()
     {
-        // Early return to prevents recursive assignation to m_currentOffset to go too high
-        //Debug.Log("currOff : " + m_currentOffset.magnitude + " > m_initOff*2 " + (m_groundedCameraOffset.magnitude * 2.0f));
-        if (m_currentOffset.magnitude > (m_groundedCameraOffset.magnitude * 2.0f))
+        // Early return to prevents recursive assignation to m_currentOffset so it does not go too high
+        if (m_currentOffset.magnitude > (m_initialCameraOffset.magnitude * m_jumpOffsetMaxMultiplier))
         {
             //Debug.Log("m_currentOffset.magnitude is higher");
             return;
         }
-        //Debug.Log("m_currentOffset.magnitude is lower");
-        //Debug.Log("currOff : " + m_currentOffset.magnitude + " > m_initOff*2 " + (m_groundedCameraOffset.magnitude * 2.0f));
-        Vector3 jumpingCameraOffset = m_currentOffset * 2.0f;
+        //Debug.Log("JumpingOffsets");
+        Vector3 jumpingCameraOffset = m_currentOffset * m_jumpCameraOffsetMultiplier;
         m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, jumpingCameraOffset, Time.deltaTime * m_lerpSpeed);
-        //Debug.Log("JumpingOffset : " + m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset);
     }
 
     private void ResetCameraPos()
     {
-        // taking in account the player size difference
+        // Early return to prevents recursive assignation to m_currentOffset so it does not go too high
+        if (m_currentOffset.magnitude < (m_initialCameraOffset.magnitude * m_jumpOffsetMaxMultiplier))
+        {
+            //Debug.Log("No reset, currOff : " + m_currentOffset.magnitude + " > " + (m_initialCameraOffset.magnitude * m_groundCameraOffsetMultiplier));
+            return;
+        }
+        
         m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset = Vector3.Lerp(m_currentOffset, m_groundedCameraOffset, Time.deltaTime * m_lerpSpeed);
-        //Debug.Log("FloorOffset : " + m_thirdPersonCamera.GetComponent<CameraFollow>().m_currentOffset);
     }
 }
