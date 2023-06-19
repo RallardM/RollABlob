@@ -21,8 +21,8 @@ public class EatenAsset : MonoBehaviour
     private void Awake()
     {
         m_playerBlob = GameObject.FindGameObjectWithTag("PlayerBlob");
-        GameObject blobFullCollider = m_playerBlob.transform.Find("FullCollider").gameObject;
-        m_blobAbsorb = blobFullCollider.GetComponent<BlobAbsorb>();
+        GameObject blobFullBodyTrigger = m_playerBlob.transform.Find("FullBodyTrigger").gameObject;
+        m_blobAbsorb = blobFullBodyTrigger.GetComponent<BlobAbsorb>();
 
         float radius = 0.0f;
         float radiusSurface = 0.0f;

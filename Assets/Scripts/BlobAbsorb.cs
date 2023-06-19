@@ -23,6 +23,14 @@ public class BlobAbsorb : MonoBehaviour
         m_playerTransform = transform.parent.transform;
         m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
         m_playerInitialScale = GetPlayerLocalScale();
+
+        // If the possibility to eat objects is activated, we need to enable the player's full body trigger
+        // so that the player can interract with objects without passthrough them.
+        if (!m_eatableObjects)
+        {
+            GameObject blobFullBodyTrigger = m_playerTransform.transform.Find("FullBodyCollider").gameObject;
+            blobFullBodyTrigger.GetComponent<SphereCollider>().enabled = true;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
