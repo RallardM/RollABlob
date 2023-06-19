@@ -8,7 +8,6 @@ using UnityEngine;
 public class EatenAsset : MonoBehaviour
 {
     private GameObject m_playerBlob;
-    private BlobAbsorb m_blobAbsorb;
     private Vector3 m_distanceToPlayer;
     private Quaternion m_AssetRotation;
     private const float m_lerpSpeed = 0.125f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
@@ -22,7 +21,6 @@ public class EatenAsset : MonoBehaviour
     {
         m_playerBlob = GameObject.FindGameObjectWithTag("PlayerBlob");
         GameObject blobFullBodyTrigger = m_playerBlob.transform.Find("FullBodyTrigger").gameObject;
-        m_blobAbsorb = blobFullBodyTrigger.GetComponent<BlobAbsorb>();
 
         float radius = 0.0f;
         float radiusSurface = 0.0f;

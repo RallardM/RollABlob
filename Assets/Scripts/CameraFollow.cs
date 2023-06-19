@@ -135,7 +135,7 @@ public class CameraFollow : MonoBehaviour
         
         if (intialPlayerSizeDiff == 0)
         {
-            return;
+            intialPlayerSizeDiff = 1.0f;
         }
 
         Vector3 newPlayerSizeOffset = new Vector3(0, 0, 0);

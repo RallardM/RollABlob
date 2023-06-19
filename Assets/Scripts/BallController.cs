@@ -4,6 +4,8 @@
 // Source : https://stackoverflow.com/questions/5096926/what-is-the-get-set-syntax-in-c
 
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
+
 public class BallController : MonoBehaviour
 {
     public float m_speed = 10.0f;
@@ -41,14 +43,23 @@ public class BallController : MonoBehaviour
     // and not for each modular floor tile.
     private void OnTriggerEnter(Collider other)
     {
-        // Only applies if the player was in the air and is now hitting the ground.
-        if (IsGrounded)
+        // Early return if the touched object is not a jumpable object.
+        if (other.gameObject.tag != "Jumpable")
         {
             return;
         }
 
+        // Only applies if the player was in the air and is now hitting the ground.
+        if (IsGrounded)
+        {
+            Debug.Log("Player is grounded");
+            return;
+        }
+        Debug.Log("Player is not grounded");
+
         // Update the player state as grounded (touching the ground from jumping).
         IsGrounded = true;
+        
 
         // If (As) the player is still stretched from the jump-strech, we need to reset it.
         if (m_jellyMesh.m_squashing != m_initialSquashing)
@@ -78,6 +89,7 @@ public class BallController : MonoBehaviour
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             IsGrounded = false;
+            Debug.Log("Player is jumping");
         }
     }
 
