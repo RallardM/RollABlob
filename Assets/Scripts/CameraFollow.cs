@@ -18,7 +18,7 @@ public class CameraFollow : MonoBehaviour
     private BlobAbsorb m_blobAbsorb;
     private Vector3 m_initialOffset = new Vector3(0, 2, -4);
     private Vector3 m_currentOffset = new Vector3(0, 2, -4);
-    //private Vector3 m_jumpingCameraOffset = new Vector3(0, 0, 0);
+
     private Vector3 m_currentRigidBodyPos;
     private float m_lerpSpeed = 1f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private float m_mouseX = 0f;

@@ -16,14 +16,12 @@ public class BallController : MonoBehaviour
     private JellyMesh m_jellyMesh;
     private Vector3 m_jumpDirection = Vector3.zero;
     private float m_heightBeforeJump = 0.0f;
-    //private float m_currentPlayerHeight = 0.0f;
     private float m_initialSquashing;
     private float m_prepareJumpSquashing;
     private float m_midAirJumpStretching;
-    private float m_lerpDuration = 3f;
+    private const float m_lerpDuration = 3.0f;
     private float m_lerpElapsedTime;
     private bool m_isGrounded = false;
-    //private bool m_isSquashing = false;
 
     public bool IsGrounded { get => m_isGrounded; set => m_isGrounded = value; }
     public float HeightBeforeJump { get => m_heightBeforeJump; set => m_heightBeforeJump = value; }
@@ -35,7 +33,7 @@ public class BallController : MonoBehaviour
         m_jellyMesh = GetComponent<JellyMesh>();
         m_initialSquashing = m_jellyMesh.m_squashing;
         m_prepareJumpSquashing = m_initialSquashing * 5.0f;
-        m_midAirJumpStretching = m_initialSquashing * -5.0f;
+        m_midAirJumpStretching = m_initialSquashing * -4.0f;
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 

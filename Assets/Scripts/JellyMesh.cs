@@ -1,7 +1,4 @@
 // Source : https://www.youtube.com/watch?v=Kwh4TkQqqf8
-// Source : https://youtu.be/mPgODeBDyIw
-// Source : https://answers.unity.com/questions/523289/change-size-of-mesh-at-runtime.html
-// Source : https://catlikecoding.com/unity/tutorials/mesh-deformation/
 
 using UnityEngine;
 
@@ -50,11 +47,11 @@ public class JellyMesh : MonoBehaviour
             Vector3 m_target = transform.TransformPoint(m_vertexArray[m_jellyVertex[i].m_id]);
             float m_newIntensity = (1 - (m_renderer.bounds.max.y - m_target.y) / m_renderer.bounds.size.y) * m_intensity;
 
-            // Calculate the squashing amount based on m_squashing and m_intensity linear interpolation between the two
-            // and applies that squashing amount on the player's mesh and collider in their y coordinates
-            float squashingAmount = Mathf.Lerp(0f, m_squashing, m_newIntensity);
-            m_target.y -= m_target.y * squashingAmount;
+            // Source : Perplexity AI
+            // Applies that squashing amount on the player's mesh
+            m_target.y -= m_target.y * m_squashing;
 
+            // Source : Perplexity AI
             // Flatten the vertices below the mesh
             if (m_target.y < m_flattenY)
             {

@@ -11,11 +11,11 @@ public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
     private MeshCollider m_playerMeshCollider;
-    private SphereCollider m_playerSphereCollider;
     private Vector3 m_playerInitialScale = Vector3.zero;
     private float m_assetMassToAdd = 0.0f;
-    private float m_massMultiplier   = 10000000;
-    private float m_lerpSpeed = 8f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
+    private const float m_massMultiplier = 10000000;
+    private const float m_lerpSpeed = 0.125f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
+    private bool m_eatableObjects = false;
 
     private void Awake()
     {
@@ -23,7 +23,6 @@ public class BlobAbsorb : MonoBehaviour
         m_playerTransform = transform.parent.transform;
         m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
         m_playerInitialScale = GetPlayerLocalScale();
-        m_playerSphereCollider = m_playerTransform.GetComponent<SphereCollider>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -33,11 +32,8 @@ public class BlobAbsorb : MonoBehaviour
         if (other.gameObject.tag == "NPC")
         {
             DeactivateNPCPhysic(other);
-
             CollectAssetMassToAddToPlayer(other);
-
             ChangeLayerTag(other);
-
             SetIsBeingEaten(other);
         }
 
@@ -45,12 +41,15 @@ public class BlobAbsorb : MonoBehaviour
         // we need to disable its the attributes that make it interact physically with the world.
         if (other.gameObject.tag == "Movable")
         {
+            // Activate/deactivate the possibility to eat objects for the whole game
+            if (!m_eatableObjects)
+            {
+                return;
+            }
+
             DeactivateObjectPhysic(other);
-
             CollectAssetMassToAddToPlayer(other);
-
             ChangeLayerTag(other);
-
             SetIsBeingEaten(other);
         }
     }
@@ -109,6 +108,7 @@ public class BlobAbsorb : MonoBehaviour
 
     private void DeactivateNPCPhysic(Collider other)
     {
+        // Early return, if the asset has no NavMeshAgent, IBrain or Rigidbody component to avoid errors
         if (other.gameObject.GetComponent<NavMeshAgent>() == null)
         {
             return;
@@ -134,6 +134,7 @@ public class BlobAbsorb : MonoBehaviour
 
     private void DeactivateObjectPhysic(Collider other)
     {
+        // Early return, if the asset has no Rigidbody component to avoid errors
         if (other.gameObject.GetComponent<Rigidbody>() == null)
         {
             return;
@@ -189,6 +190,8 @@ public class BlobAbsorb : MonoBehaviour
 
     private float VerifyOverSubstraction(float valueToCheck)
     {
+        // If the value to check is under zero, return zero
+        // so the result does not goes under zero
         if (valueToCheck < 0)
         {
             return valueToCheck = 0;
@@ -209,9 +212,9 @@ public class BlobAbsorb : MonoBehaviour
     {
         // Source : https://gamedevbeginner.com/the-right-way-to-lerp-in-unity-with-examples/
         // Lerps the current player's scale to the new scale resulting from the added mass from the eaten asset.
-        float xLerp = Mathf.Lerp(GetPlayerLocalScale().x, GetPlayerLocalScale().x + GetAddedMassCubeRoot(), Time.fixedDeltaTime / m_lerpSpeed);
-        float yLerp = Mathf.Lerp(GetPlayerLocalScale().y, GetPlayerLocalScale().y + GetAddedMassCubeRoot(), Time.fixedDeltaTime / m_lerpSpeed);
-        float zLerp = Mathf.Lerp(GetPlayerLocalScale().z, GetPlayerLocalScale().z + GetAddedMassCubeRoot(), Time.fixedDeltaTime / m_lerpSpeed);
+        float xLerp = Mathf.Lerp(GetPlayerLocalScale().x, GetPlayerLocalScale().x + GetAddedMassCubeRoot(), Time.fixedDeltaTime * m_lerpSpeed);
+        float yLerp = Mathf.Lerp(GetPlayerLocalScale().y, GetPlayerLocalScale().y + GetAddedMassCubeRoot(), Time.fixedDeltaTime * m_lerpSpeed);
+        float zLerp = Mathf.Lerp(GetPlayerLocalScale().z, GetPlayerLocalScale().z + GetAddedMassCubeRoot(), Time.fixedDeltaTime * m_lerpSpeed);
 
         // Resize the player scale to the lerping new scale
         // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
