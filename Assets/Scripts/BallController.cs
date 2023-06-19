@@ -41,6 +41,12 @@ public class BallController : MonoBehaviour
     // and not for each modular floor tile.
     private void OnTriggerEnter(Collider other)
     {
+        // Early return if the toucing object is not a jumpable object.
+        if (other.gameObject.layer == LayerMask.NameToLayer("Jumpable"))
+        {
+            return;
+        }
+
         // Only applies if the player was in the air and is now hitting the ground.
         if (IsGrounded)
         {
