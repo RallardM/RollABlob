@@ -7,7 +7,7 @@ public class CameraFollow : MonoBehaviour
     public float m_mouseSensitivity = 100f;
     public float m_smoothSpeed = 0.5f;
     public float m_clampCamUp = 90f;
-    public float m_clampCamDown = -45f;
+    public float m_clampCamDown = -25f;
 
     private Camera m_thirdPersonCamera;
     private Rigidbody m_ballRigidbody;
@@ -20,6 +20,7 @@ public class CameraFollow : MonoBehaviour
     private float m_lerpSpeed = 1f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private float m_mouseX = 0f;
     private float m_mouseY = 0f;
+    private const float m_jumpValueReduction = 0.375f;
 
     private void Awake()
     {
@@ -99,7 +100,7 @@ public class CameraFollow : MonoBehaviour
         Vector3 jumpingCameraOffset = m_currentOffset;
 
         // Use the jumping offset to offset the camera
-        float camOffsetFromJump = Mathf.Abs(GetJumpHeight() * 0.375f);
+        float camOffsetFromJump = Mathf.Abs(GetJumpHeight() * m_jumpValueReduction);
 
         jumpingCameraOffset.y *= camOffsetFromJump;
         jumpingCameraOffset.z *= camOffsetFromJump;

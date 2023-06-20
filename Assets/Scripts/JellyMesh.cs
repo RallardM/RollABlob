@@ -18,7 +18,16 @@ public class JellyMesh : MonoBehaviour
 
     private void Awake()
     {
-        m_rigidbody = GetComponent<Rigidbody>();
+        todo
+        if (GetComponent<Rigidbody>() == null)
+        {
+            
+        }
+        else
+        {
+            m_rigidbody = GetComponent<Rigidbody>();
+        }
+
         m_originalMesh = GetComponent<MeshFilter>().sharedMesh;
         m_meshClone = Instantiate(m_originalMesh);
         GetComponent<MeshFilter>().sharedMesh = m_meshClone;
