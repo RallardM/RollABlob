@@ -1,15 +1,13 @@
 // Source : https://forum.unity.com/threads/how-to-get-pitch-and-yaw-of-goal-position-for-camera-orbit-solved.417644/
 // Source : https://youtu.be/sNmeK3qK7oA
 
-using System;
 using UnityEngine;
-
 public class CameraFollow : MonoBehaviour
 {
     public float m_mouseSensitivity = 100f;
     public float m_smoothSpeed = 0.5f;
     public float m_clampCamUp = 90f;
-    public float m_clampCamDown = -70f;
+    public float m_clampCamDown = -45f;
 
     private Camera m_thirdPersonCamera;
     private Rigidbody m_ballRigidbody;

@@ -1,10 +1,8 @@
 // Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
 // Source : https://stackoverflow.com/questions/58377170/how-to-jump-in-unity-3d
-
 // Source : https://stackoverflow.com/questions/5096926/what-is-the-get-set-syntax-in-c
 
 using UnityEngine;
-using UnityEngine.Rendering.HighDefinition;
 
 public class BallController : MonoBehaviour
 {
@@ -52,15 +50,12 @@ public class BallController : MonoBehaviour
         // Only applies if the player was in the air and is now hitting the ground.
         if (IsGrounded)
         {
-            Debug.Log("Player is grounded");
             return;
         }
-        Debug.Log("Player is not grounded");
 
         // Update the player state as grounded (touching the ground from jumping).
         IsGrounded = true;
         
-
         // If (As) the player is still stretched from the jump-strech, we need to reset it.
         if (m_jellyMesh.m_squashing != m_initialSquashing)
         {
@@ -89,7 +84,6 @@ public class BallController : MonoBehaviour
             m_ballRigidbody.AddForce(m_jumpDirection * m_jumpForce, ForceMode.Impulse);
             m_jellyMesh.m_squashing = Mathf.Lerp(m_jellyMesh.m_squashing, m_midAirJumpStretching, Mathf.SmoothStep(0, 1, percentageComplete));
             IsGrounded = false;
-            Debug.Log("Player is jumping");
         }
     }
 

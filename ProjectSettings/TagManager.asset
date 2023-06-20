@@ -22,10 +22,10 @@ TagManager:
   - EatenAssets
   - MovableProps
   - Jumpable
-  - BlobFullCollider
+  - BlobFullTrigger
   - HardProps
   - JumpDetector
-  - 
+  - BlobFullCollider
   - 
   - 
   - 
