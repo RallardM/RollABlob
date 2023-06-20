@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4827410518518274}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Fence_B_1 prefab
-  m_TagString: Jumpable
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &4827410518518274
 Transform:
@@ -44,13 +44,12 @@ GameObject:
   - component: {fileID: 33716655951553554}
   - component: {fileID: 23912519960618090}
   - component: {fileID: 65956786667776442}
-  - component: {fileID: 208425394}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Fence_B_1
-  m_TagString: Jumpable
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
-  m_NavMeshLayer: 2
-  m_StaticEditorFlags: 2147483647
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &4085627660979732
 Transform:
@@ -130,19 +129,3 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.0007024747, y: 0.0004980609, z: 0.009999997}
   m_Center: {x: 0, y: 0, z: 0.0049999985}
---- !u!54 &208425394
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1416435686194116}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
