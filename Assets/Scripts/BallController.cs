@@ -37,32 +37,6 @@ public class BallController : MonoBehaviour
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
-    // Should only be handled when the player hit the floor after a jump.
-    // and not for each modular floor tile.
-    private void OnTriggerEnter(Collider other)
-    {
-        // Early return if the touched object is not a jumpable object.
-        if (other.gameObject.tag != "Jumpable")
-        {
-            return;
-        }
-
-        // Only applies if the player was in the air and is now hitting the ground.
-        if (IsGrounded)
-        {
-            return;
-        }
-
-        // Update the player state as grounded (touching the ground from jumping).
-        IsGrounded = true;
-        
-        // If (As) the player is still stretched from the jump-strech, we need to reset it.
-        if (m_jellyMesh.m_squashing != m_initialSquashing)
-        {
-            m_jellyMesh.m_squashing = m_initialSquashing;
-        }
-    }
-
     private void Update()
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;

@@ -10,9 +10,11 @@ using UnityEngine.AI;
 public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
-    private MeshCollider m_playerMeshCollider;
+    private BallController m_playerBallController;
+    private JellyMesh m_jellyMesh;
     private Vector3 m_playerInitialScale = Vector3.zero;
     private float m_assetMassToAdd = 0.0f;
+    private float m_initialSquashing;
     private const float m_massMultiplier = 10000000;
     private const float m_lerpSpeed = 0.125f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private bool m_eatableObjects = false;
@@ -21,16 +23,18 @@ public class BlobAbsorb : MonoBehaviour
     {
         // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
         m_playerTransform = transform.parent.transform;
-        m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
+        m_playerBallController = m_playerTransform.GetComponent<BallController>();
+        m_jellyMesh = m_playerTransform.GetComponent<JellyMesh>();
+        m_initialSquashing = m_jellyMesh.m_squashing;
         m_playerInitialScale = GetPlayerLocalScale();
 
         // If the possibility to eat objects is activated, we need to enable the player's full body trigger
         // so that the player can interract with objects without passthrough them.
-        //if (!m_eatableObjects)
-        //{
-        //    GameObject blobFullBodyTrigger = m_playerTransform.transform.Find("FullBodyCollider").gameObject;
-        //    blobFullBodyTrigger.GetComponent<SphereCollider>().enabled = true;
-        //}
+        if (!m_eatableObjects)
+        {
+            GameObject blobFullBodyTrigger = m_playerTransform.transform.Find("FullBodyCollider").gameObject;
+            blobFullBodyTrigger.GetComponent<SphereCollider>().enabled = true;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -39,10 +43,12 @@ public class BlobAbsorb : MonoBehaviour
         // we need to disable its the attributes that make it interact physically with the world.
         if (other.gameObject.tag == "NPC")
         {
-            DeactivateNPCPhysic(other);
-            CollectAssetMassToAddToPlayer(other);
-            ChangeLayerTag(other);
-            SetIsBeingEaten(other);
+            Debug.Log("NPC : " + other.name + " Before Position : " + other.transform.position);
+            //DeactivateNPCPhysic(other);
+            //CollectAssetMassToAddToPlayer(other);
+            //ChangeLayerTag(other);
+            //SetIsBeingEaten(other);
+            return;
         }
 
         // If the asset in contact with the player is a movable object,
@@ -59,6 +65,30 @@ public class BlobAbsorb : MonoBehaviour
             CollectAssetMassToAddToPlayer(other);
             ChangeLayerTag(other);
             SetIsBeingEaten(other);
+            return;
+        }
+
+        // What follows should only be handled when the player hit the floor after a jump.
+        // and not for each modular floor tile.
+        // Early return if the touched object is not a jumpable object.
+        if (other.gameObject.tag != "Jumpable")
+        {
+            return;
+        }
+
+        // Only applies if the player was in the air and is now hitting the ground.
+        if (m_playerBallController.IsGrounded)
+        {
+            return;
+        }
+
+        // Update the player state as grounded (touching the ground from jumping).
+        m_playerBallController.IsGrounded = true;
+
+        // If (As) the player is still stretched from the jump-strech, we need to reset it.
+        if (m_jellyMesh.m_squashing != m_initialSquashing)
+        {
+            m_jellyMesh.m_squashing = m_initialSquashing;
         }
     }
 
@@ -76,22 +106,7 @@ public class BlobAbsorb : MonoBehaviour
             // Then substract the mass that was added to the player from the asset's mass collected in m_assetMassToAdd
             // and return the mass that was substracted to see how much mass is left to add to the player
             float massAddedToSubstract = SubstractNewlyAddedMass();
-
-            // If there is no more mass to add to the player update the player's mesh collider to the new player's scale
-            if (massAddedToSubstract == 0.0f)
-            {
-                UpdatePlayerMesh();
-            }
         }
-    }
-
-    public Vector3 GetPlayerNewSize()
-    {
-        // Source : https://docs.unity3d.com/ScriptReference/Collider-bounds.html
-        float colliderHeight = m_playerMeshCollider.bounds.size.y;
-        float colliderWidth = m_playerMeshCollider.bounds.size.x;
-        float colliderDepth = m_playerMeshCollider.bounds.size.z;
-        return new Vector3(colliderWidth, colliderHeight, colliderDepth);
     }
 
     public float GetPLayerSizeDifference()
@@ -227,12 +242,5 @@ public class BlobAbsorb : MonoBehaviour
         // Resize the player scale to the lerping new scale
         // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
         return new Vector3(xLerp, yLerp, zLerp);
-    }
-
-    private void UpdatePlayerMesh()
-    {
-        // Update the player's mesh collider to the new scale
-        m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = null;
-        m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = m_playerTransform.GetComponent<MeshFilter>().mesh;
     }
 }

@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 4610038272470046}
   - component: {fileID: 33605661506549380}
   - component: {fileID: 23556876736857538}
-  - component: {fileID: 64336747843363168}
+  - component: {fileID: 2470224646150840202}
+  - component: {fileID: 6863520225931861851}
   m_Layer: 12
   m_Name: street lamp 2
   m_TagString: Untagged
@@ -86,8 +87,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &64336747843363168
-MeshCollider:
+--- !u!65 &2470224646150840202
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -96,10 +97,22 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: c676bc2cbcce204439e758464c03bcc1, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.0024358951, y: 0.0023505443, z: 0.040746067}
+  m_Center: {x: -0.00010949895, y: 0.000063598425, z: 0.020373065}
+--- !u!65 &6863520225931861851
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1637200520728134}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.0052135442, y: 0.005594508, z: 0.009985548}
+  m_Center: {x: 0.000097063225, y: 0.00024108014, z: 0.04590337}
 --- !u!1 &1879644038180034
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,7 +162,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7779491773358023633
 Transform:
   m_ObjectHideFlags: 0
