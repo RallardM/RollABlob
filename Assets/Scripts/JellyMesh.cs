@@ -18,7 +18,18 @@ public class JellyMesh : MonoBehaviour
 
     private void Awake()
     {
-        m_rigidbody = GetComponent<Rigidbody>();
+        
+        if (!GetComponent<Rigidbody>())
+        {
+            // If the script is on the shadow blob
+            m_rigidbody = transform.parent.gameObject.GetComponent<Rigidbody>();
+        }
+        else
+        {
+            // If the script is on the blob
+            m_rigidbody = GetComponent<Rigidbody>();
+        }
+
         m_originalMesh = GetComponent<MeshFilter>().sharedMesh;
         m_meshClone = Instantiate(m_originalMesh);
         GetComponent<MeshFilter>().sharedMesh = m_meshClone;
