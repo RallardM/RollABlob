@@ -16,9 +16,9 @@ MonoBehaviour:
   lightLayerName0: Light Layer default
   lightLayerName1: BlobCaustics
   lightLayerName2: BlobPlayer
-  lightLayerName3: Light Layer 3
-  lightLayerName4: Light Layer 4
-  lightLayerName5: Light Layer 5
+  lightLayerName3: GreenShadow
+  lightLayerName4: NormalShadow
+  lightLayerName5: MovableShadow
   lightLayerName6: Light Layer 6
   lightLayerName7: Light Layer 7
   m_StripDebugVariants: 1
