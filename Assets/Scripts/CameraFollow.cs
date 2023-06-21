@@ -6,16 +6,16 @@ public class CameraFollow : MonoBehaviour
 {
     public float m_mouseSensitivity = 100f;
     public float m_smoothSpeed = 0.5f;
-    public float m_clampCamUp = 70f;
-    public float m_clampCamDown = 10.0f;
 
+    private float m_clampCamUp = 65.0f;
+    private float m_clampCamDown = -15.0f;
     private Camera m_thirdPersonCamera;
     private Rigidbody m_ballRigidbody;
     private GameObject m_playerBlob;
     private BallController m_ballController;
     private BlobAbsorb m_blobAbsorb;
-    private Vector3 m_initialOffset = new Vector3(0, 2, -4);
-    private Vector3 m_currentOffset = new Vector3(0, 2, -4);
+    private Vector3 m_initialOffset = new Vector3(0, 3, -5);
+    private Vector3 m_currentOffset = new Vector3(0, 3, -5);
 
     private float m_lerpSpeed = 1f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private float m_mouseX = 0f;
