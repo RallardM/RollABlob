@@ -1,16 +1,18 @@
 // Source : https://www.youtube.com/watch?v=Kwh4TkQqqf8
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class JellyMesh : MonoBehaviour
 {
-    public float m_intensity = 1f;
-    public float m_stiffness = 1f;
-    public float m_damping = 0.75f;
-    public float m_squashing = 0f;
-    public float m_flattenY = 0f;
-    private Rigidbody m_rigidbody;
+    public float m_intensity = 1.17f;
+    public float m_stiffness = 0.38f;
+    public float m_damping = 0.13f;
+    public float m_squashing = 0.05f;
+    public float m_flattenY = -0.05f;
 
+    private Rigidbody m_rigidbody;
+    private Transform m_transform;
     private Mesh m_originalMesh, m_meshClone;
     private MeshRenderer m_renderer;
     private JellyVertex[] m_jellyVertex;
@@ -18,7 +20,6 @@ public class JellyMesh : MonoBehaviour
 
     private void Awake()
     {
-        
         if (!GetComponent<Rigidbody>())
         {
             // If the script is on the shadow blob
@@ -30,22 +31,27 @@ public class JellyMesh : MonoBehaviour
             m_rigidbody = GetComponent<Rigidbody>();
         }
 
-        m_originalMesh = GetComponent<MeshFilter>().sharedMesh;
+        // Source : ChatGPT
+        var meshFilter = GetComponent<MeshFilter>();
+        m_originalMesh = meshFilter.sharedMesh;
         m_meshClone = Instantiate(m_originalMesh);
-        GetComponent<MeshFilter>().sharedMesh = m_meshClone;
+        meshFilter.sharedMesh = m_meshClone;
         m_renderer = GetComponent<MeshRenderer>();
         m_jellyVertex = new JellyVertex[m_meshClone.vertices.Length];
     }
 
+
     // Start is called before the first frame update
     void Start()
     {
+        m_transform = transform;
+
         for (int i = 0; i < m_meshClone.vertices.Length; i++)
         {
             Vector3 vertex = m_meshClone.vertices[i];
             vertex.y = m_flattenY;
             m_meshClone.vertices[i] = vertex;
-            m_jellyVertex[i] = new JellyVertex(i, transform.TransformPoint(m_meshClone.vertices[i]));
+            m_jellyVertex[i] = new JellyVertex(i, m_transform.TransformPoint(m_meshClone.vertices[i]));
         }
     }
 
@@ -53,10 +59,13 @@ public class JellyMesh : MonoBehaviour
     void FixedUpdate()
     {
         m_vertexArray = m_originalMesh.vertices;
+        // Source : ChatGPT
+        Matrix4x4 localToWorldMatrix = m_transform.localToWorldMatrix;
+
         for (int i = 0; i < m_jellyVertex.Length; i++) 
         {
-            Vector3 m_target = transform.TransformPoint(m_vertexArray[m_jellyVertex[i].m_id]);
-            float m_newIntensity = (1 - (m_renderer.bounds.max.y - m_target.y) / m_renderer.bounds.size.y) * m_intensity;
+            Vector3 m_target = localToWorldMatrix.MultiplyPoint3x4(m_vertexArray[m_jellyVertex[i].m_id]);
+            //float m_newIntensity = (1 - (m_renderer.bounds.max.y - m_target.y) / m_renderer.bounds.size.y) * m_intensity;
 
             // Source : Perplexity AI
             // Applies that squashing amount on the player's mesh
@@ -70,7 +79,8 @@ public class JellyMesh : MonoBehaviour
             }
 
             m_jellyVertex[i].Shake(m_target, m_rigidbody.mass, m_stiffness, m_damping);
-            m_target = transform.InverseTransformPoint(m_jellyVertex[i].m_position);
+            // Source : ChatGPT
+            m_target = m_transform.InverseTransformPoint(m_jellyVertex[i].m_position);
             m_vertexArray[m_jellyVertex[i].m_id] = Vector3.Lerp(m_vertexArray[m_jellyVertex[i].m_id], m_target, m_intensity);
         }
         m_meshClone.vertices = m_vertexArray;

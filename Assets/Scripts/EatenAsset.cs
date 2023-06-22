@@ -16,10 +16,12 @@ public class EatenAsset : MonoBehaviour
     private const float m_lerpSpeed = 0.125f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private bool m_isBeingEaten = false;
     private bool m_isEaten = false;
+    private bool m_isDigested = false;
     private Transform m_char1;
 
     public bool IsBeingEaten { get => m_isBeingEaten; set => m_isBeingEaten = value; }
     public bool IsEaten { get => m_isEaten; set => m_isEaten = value; }
+    public bool IsDigested { get => m_isDigested; set => m_isDigested = value; }
 
     private void Awake()
     {
@@ -71,13 +73,10 @@ public class EatenAsset : MonoBehaviour
 
     void FixedUpdate()
     {
-        //if (this.transform.name == "Char1")
-        //{
-        //    if ( this.transform.localPosition.y < -0.5f)
-        //    {
-        //        Debug.Log("Char1 is under 0.5f");
-        //    }
-        //}
+        if (IsDigested)
+        {
+            DigestAsset();
+        }
 
         // BlobAsorb script sets if the object touching the player as IsBeingEaten
         if (IsBeingEaten && !IsEaten)
@@ -92,6 +91,12 @@ public class EatenAsset : MonoBehaviour
         }
 
         LerpAssetToPlayer();
+    }
+
+    private void DigestAsset()
+    {
+        this.transform.position = m_playerBlob.position;
+        this.transform.rotation = m_playerBlob.rotation;
     }
 
     private void PrepareAssetToBeEaten()

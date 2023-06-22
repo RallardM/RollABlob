@@ -10,11 +10,8 @@ using UnityEngine.AI;
 public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
-    private BallController m_playerBallController;
-    private JellyMesh m_jellyMesh;
     private Vector3 m_playerInitialScale = Vector3.zero;
     private float m_assetMassToAdd = 0.0f;
-    private float m_initialSquashing;
     private const float m_massMultiplier = 10000000;
     private const float m_lerpSpeed = 0.125f; // Divide by 2 or multiply by 0.5, higher divider or smaller multiplier, faster lerp
     private bool m_eatableObjects = false;
@@ -23,9 +20,6 @@ public class BlobAbsorb : MonoBehaviour
     {
         // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
         m_playerTransform = transform.parent.transform;
-        m_playerBallController = m_playerTransform.GetComponent<BallController>();
-        m_jellyMesh = m_playerTransform.GetComponent<JellyMesh>();
-        m_initialSquashing = m_jellyMesh.m_squashing;
         m_playerInitialScale = GetPlayerLocalScale();
 
         // If the possibility to eat objects is activated, we need to enable the player's full body trigger
@@ -39,21 +33,30 @@ public class BlobAbsorb : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+
+
+        if (other.gameObject.GetComponent<EatenAsset>() == null)
+        {
+            return;
+        }
+
+        bool isBeingEaten = other.gameObject.GetComponent<EatenAsset>().IsBeingEaten;
+        bool isEaten = other.gameObject.GetComponent<EatenAsset>().IsEaten;
+        bool isDigested = other.gameObject.GetComponent<EatenAsset>().IsDigested;
+        bool isUntouched = (isBeingEaten == false && isEaten == false && isDigested == false);
+
         // If the asset in contact with the player is a NPC,
         // we need to disable its the attributes that make it interact physically with the world.
-        if (other.gameObject.tag == "NPC")
+        if (other.gameObject.tag == "NPC" && isUntouched)
         {
             Debug.Log("NPC : " + other.name + " Before Position : " + other.transform.position);
-            //DeactivateNPCPhysic(other);
-            //CollectAssetMassToAddToPlayer(other);
-            //ChangeLayerTag(other);
-            //SetIsBeingEaten(other);
+            PrepareNPC(other);
             return;
         }
 
         // If the asset in contact with the player is a movable object,
         // we need to disable its the attributes that make it interact physically with the world.
-        if (other.gameObject.tag == "Movable")
+        if (other.gameObject.tag == "Movable" && isUntouched)
         {
             // Activate/deactivate the possibility to eat objects for the whole game
             if (!m_eatableObjects)
@@ -66,29 +69,6 @@ public class BlobAbsorb : MonoBehaviour
             ChangeLayerTag(other);
             SetIsBeingEaten(other);
             return;
-        }
-
-        // What follows should only be handled when the player hit the floor after a jump.
-        // and not for each modular floor tile.
-        // Early return if the touched object is not a jumpable object.
-        if (other.gameObject.tag != "Jumpable")
-        {
-            return;
-        }
-
-        // Only applies if the player was in the air and is now hitting the ground.
-        if (m_playerBallController.IsGrounded)
-        {
-            return;
-        }
-
-        // Update the player state as grounded (touching the ground from jumping).
-        m_playerBallController.IsGrounded = true;
-
-        // If (As) the player is still stretched from the jump-strech, we need to reset it.
-        if (m_jellyMesh.m_squashing != m_initialSquashing)
-        {
-            m_jellyMesh.m_squashing = m_initialSquashing;
         }
     }
 
@@ -122,6 +102,14 @@ public class BlobAbsorb : MonoBehaviour
         }
 
         return playerSizeDifference;
+    }
+
+    public void PrepareNPC(Collider other)
+    {
+        DeactivateNPCPhysic(other);
+        CollectAssetMassToAddToPlayer(other);
+        ChangeLayerTag(other);
+        SetIsBeingEaten(other);
     }
 
     private Vector3 GetPlayerLocalScale()
