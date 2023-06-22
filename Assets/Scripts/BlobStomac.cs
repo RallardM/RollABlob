@@ -42,6 +42,7 @@ public class BlobStomac : MonoBehaviour
         // set it to is digested
         // this will force its position syncing
         // to the player's position in EatenAsset.cs
+        Debug.Log(other.name + "Is digested");
         other.gameObject.GetComponent<EatenAsset>().IsDigested = true;
     }
 }

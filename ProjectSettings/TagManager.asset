@@ -28,8 +28,8 @@ TagManager:
   - BlobFullCollider
   - Ligths
   - InvisibleWalls
-  - 
-  - 
+  - Platform
+  - AiActivator
   - 
   - 
   - 

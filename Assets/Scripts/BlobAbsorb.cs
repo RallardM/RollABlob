@@ -49,7 +49,6 @@ public class BlobAbsorb : MonoBehaviour
         // we need to disable its the attributes that make it interact physically with the world.
         if (other.gameObject.tag == "NPC" && isUntouched)
         {
-            Debug.Log("NPC : " + other.name + " Before Position : " + other.transform.position);
             PrepareNPC(other);
             return;
         }
