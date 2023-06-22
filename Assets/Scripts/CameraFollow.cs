@@ -80,7 +80,7 @@ public class CameraFollow : MonoBehaviour
         m_mouseY -= m_mouseSensitivity * Input.GetAxis("Mouse Y");
 
         // Clamp the pitch value to avoid flipping the camera
-        m_mouseY = Mathf.Clamp(m_mouseY, m_clampCamDown, m_clampCamUp);
+        m_mouseY = Mathf.Clamp(m_mouseY, m_clampCamDown,  m_clampCamUp);
 
         // Calculate the rotation based on the X and Y
         Quaternion rotation = Quaternion.Euler(m_mouseY, m_mouseX, 0f);
