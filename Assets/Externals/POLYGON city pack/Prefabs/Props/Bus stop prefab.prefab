@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 23035274214417916}
   - component: {fileID: 64569159665365844}
   - component: {fileID: 2103745211}
-  m_Layer: 9
+  m_Layer: 12
   m_Name: Bus stop
   m_TagString: Movable
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 16
   m_CollisionDetection: 0
 --- !u!1 &1742271052185720
 GameObject:

@@ -1,13 +1,14 @@
 // Source : https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
 // Source : https://stackoverflow.com/questions/58377170/how-to-jump-in-unity-3d
-
 // Source : https://stackoverflow.com/questions/5096926/what-is-the-get-set-syntax-in-c
 
 using UnityEngine;
+
 public class BallController : MonoBehaviour
 {
     public float m_speed = 10.0f;
     public float m_torque = 20.0f;
+    public float m_acceleration = 10.0f;
     public float m_jumpForce = 2.0f;
     public float m_cameraJumpSpeed = 0.5f;
 
@@ -37,32 +38,6 @@ public class BallController : MonoBehaviour
         m_jumpDirection = new Vector3(0.0f, 1.0f, 0.0f);
     }
 
-    // Should only be handled when the player hit the floor after a jump.
-    // and not for each modular floor tile.
-    private void OnTriggerEnter(Collider other)
-    {
-        // Early return if the toucing object is not a jumpable object.
-        if (other.gameObject.layer == LayerMask.NameToLayer("Jumpable"))
-        {
-            return;
-        }
-
-        // Only applies if the player was in the air and is now hitting the ground.
-        if (IsGrounded)
-        {
-            return;
-        }
-
-        // Update the player state as grounded (touching the ground from jumping).
-        IsGrounded = true;
-
-        // If (As) the player is still stretched from the jump-strech, we need to reset it.
-        if (m_jellyMesh.m_squashing != m_initialSquashing)
-        {
-            m_jellyMesh.m_squashing = m_initialSquashing;
-        }
-    }
-
     private void Update()
     {
         m_lerpElapsedTime += Time.fixedDeltaTime;
@@ -89,6 +64,30 @@ public class BallController : MonoBehaviour
 
     // Update is called once per frame
     void FixedUpdate()
+    {
+        if (IsGrounded && Input.GetKey(KeyCode.LeftControl))
+        {
+            // Source : https://discussions.unity.com/t/braking-torque-on-a-rigid-body/72806
+            m_ballRigidbody.angularVelocity = Vector3.zero;
+            m_jellyMesh.m_squashing = m_prepareJumpSquashing;
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            m_jellyMesh.m_squashing = m_initialSquashing;
+        }
+
+        if (IsGrounded)
+        {
+            GroundedControls();
+        }
+        else
+        {
+            MidAirControls();
+        }
+    }
+
+    private void GroundedControls()
     {
         // Source : Maxime Flageole and Alexandre Pipon
         m_lerpElapsedTime += Time.fixedDeltaTime;
@@ -119,6 +118,39 @@ public class BallController : MonoBehaviour
 
         // Source: https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
         m_ballRigidbody.AddTorque(GetIsShiftPressed() * m_speed * m_torque * Time.fixedDeltaTime * direction, ForceMode.Force);
+    }
+
+    private void MidAirControls()
+    {
+        // Source : https://forum.unity.com/threads/character-jumping-when-i-look-up-and-move-forward.1317753/
+        // Source : https://forum.unity.com/threads/what-is-transform-forward.338384/
+        m_lerpElapsedTime += Time.fixedDeltaTime;
+
+        Vector3 direction = new Vector3();
+
+        if (Input.GetKey(KeyCode.W))
+        {
+            direction += m_thirdPersonCamera.transform.forward;
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            direction -= m_thirdPersonCamera.transform.right;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            direction -= m_thirdPersonCamera.transform.forward;
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            direction += m_thirdPersonCamera.transform.right;
+        }
+
+        if (direction.magnitude <= 0)
+        {
+            return;
+        }
+
+        m_ballRigidbody.AddForce(m_speed * m_acceleration * Time.fixedDeltaTime * direction, ForceMode.Acceleration);
     }
 
     // Is called at the add torque, if the player is pressing the shift key, it will increase the speed of the ball.

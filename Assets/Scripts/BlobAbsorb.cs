@@ -10,7 +10,6 @@ using UnityEngine.AI;
 public class BlobAbsorb : MonoBehaviour
 {
     private Transform m_playerTransform;
-    private MeshCollider m_playerMeshCollider;
     private Vector3 m_playerInitialScale = Vector3.zero;
     private float m_assetMassToAdd = 0.0f;
     private const float m_massMultiplier = 10000000;
@@ -21,25 +20,42 @@ public class BlobAbsorb : MonoBehaviour
     {
         // Source : https://forum.unity.com/threads/getting-the-position-of-a-parent-gameobject.1138150/
         m_playerTransform = transform.parent.transform;
-        m_playerMeshCollider = m_playerTransform.GetComponent<MeshCollider>();
         m_playerInitialScale = GetPlayerLocalScale();
+
+        // If the possibility to eat objects is activated, we need to enable the player's full body trigger
+        // so that the player can interract with objects without passthrough them.
+        if (!m_eatableObjects)
+        {
+            GameObject blobFullBodyTrigger = m_playerTransform.transform.Find("FullBodyCollider").gameObject;
+            blobFullBodyTrigger.GetComponent<SphereCollider>().enabled = true;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
+
+
+        if (other.gameObject.GetComponent<EatenAsset>() == null)
+        {
+            return;
+        }
+
+        bool isBeingEaten = other.gameObject.GetComponent<EatenAsset>().IsBeingEaten;
+        bool isEaten = other.gameObject.GetComponent<EatenAsset>().IsEaten;
+        bool isDigested = other.gameObject.GetComponent<EatenAsset>().IsDigested;
+        bool isUntouched = (isBeingEaten == false && isEaten == false && isDigested == false);
+
         // If the asset in contact with the player is a NPC,
         // we need to disable its the attributes that make it interact physically with the world.
-        if (other.gameObject.tag == "NPC")
+        if (other.gameObject.tag == "NPC" && isUntouched)
         {
-            DeactivateNPCPhysic(other);
-            CollectAssetMassToAddToPlayer(other);
-            ChangeLayerTag(other);
-            SetIsBeingEaten(other);
+            PrepareNPC(other);
+            return;
         }
 
         // If the asset in contact with the player is a movable object,
         // we need to disable its the attributes that make it interact physically with the world.
-        if (other.gameObject.tag == "Movable")
+        if (other.gameObject.tag == "Movable" && isUntouched)
         {
             // Activate/deactivate the possibility to eat objects for the whole game
             if (!m_eatableObjects)
@@ -51,6 +67,7 @@ public class BlobAbsorb : MonoBehaviour
             CollectAssetMassToAddToPlayer(other);
             ChangeLayerTag(other);
             SetIsBeingEaten(other);
+            return;
         }
     }
 
@@ -68,28 +85,15 @@ public class BlobAbsorb : MonoBehaviour
             // Then substract the mass that was added to the player from the asset's mass collected in m_assetMassToAdd
             // and return the mass that was substracted to see how much mass is left to add to the player
             float massAddedToSubstract = SubstractNewlyAddedMass();
-
-            // If there is no more mass to add to the player update the player's mesh collider to the new player's scale
-            if (massAddedToSubstract == 0.0f)
-            {
-                UpdatePlayerMesh();
-            }
         }
-    }
-
-    public Vector3 GetPlayerNewSize()
-    {
-        // Source : https://docs.unity3d.com/ScriptReference/Collider-bounds.html
-        float colliderHeight = m_playerMeshCollider.bounds.size.y;
-        float colliderWidth = m_playerMeshCollider.bounds.size.x;
-        float colliderDepth = m_playerMeshCollider.bounds.size.z;
-        return new Vector3(colliderWidth, colliderHeight, colliderDepth);
     }
 
     public float GetPLayerSizeDifference()
     {
+        float playerSizeDifference = 0.0f;
+
         // Calculate the offset based on the difference between the player's initial and new size
-        float playerSizeDifference = m_playerTransform.localScale.y / m_playerInitialScale.y;
+        playerSizeDifference = m_playerTransform.localScale.y / m_playerInitialScale.y;
 
         if (playerSizeDifference == 1.0f)
         {
@@ -97,6 +101,14 @@ public class BlobAbsorb : MonoBehaviour
         }
 
         return playerSizeDifference;
+    }
+
+    public void PrepareNPC(Collider other)
+    {
+        DeactivateNPCPhysic(other);
+        CollectAssetMassToAddToPlayer(other);
+        ChangeLayerTag(other);
+        SetIsBeingEaten(other);
     }
 
     private Vector3 GetPlayerLocalScale()
@@ -217,12 +229,5 @@ public class BlobAbsorb : MonoBehaviour
         // Resize the player scale to the lerping new scale
         // Source : https://docs.unity3d.com/ScriptReference/Transform-localScale.html
         return new Vector3(xLerp, yLerp, zLerp);
-    }
-
-    private void UpdatePlayerMesh()
-    {
-        // Update the player's mesh collider to the new scale
-        m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = null;
-        m_playerMeshCollider.GetComponent<MeshCollider>().sharedMesh = m_playerTransform.GetComponent<MeshFilter>().mesh;
     }
 }
