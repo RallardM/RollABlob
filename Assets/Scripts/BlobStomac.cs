@@ -17,32 +17,16 @@ public class BlobStomac : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        bool isBeingEaten = other.gameObject.GetComponent<EatenAsset>().IsBeingEaten;
-        bool isEaten = other.gameObject.GetComponent<EatenAsset>().IsEaten;
-        bool isDigested = other.gameObject.GetComponent<EatenAsset>().IsDigested;
-        bool isUntouched = (isBeingEaten == false && isEaten == false && isDigested == false); 
-
-        if (other.gameObject.tag != "NPC")
-        {
-            return;
-        }
-
         if (other.gameObject.GetComponent<EatenAsset>().IsBeingEaten == false)
         {
             m_blobAbsorb.PrepareNPC(other);
-            return;
-        }
-
-        if (isDigested)
-        {
-            return;
         }
 
         // If is not digested,
         // set it to is digested
         // this will force its position syncing
         // to the player's position in EatenAsset.cs
-        Debug.Log(other.name + "Is digested");
+        Debug.Log(other.name + " Is digested");
         other.gameObject.GetComponent<EatenAsset>().IsDigested = true;
     }
 }

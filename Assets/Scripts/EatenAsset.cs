@@ -95,8 +95,14 @@ public class EatenAsset : MonoBehaviour
 
     private void DigestAsset()
     {
-        this.transform.position = m_playerBlob.position;
-        this.transform.rotation = m_playerBlob.rotation;
+        // Source : https://discussions.unity.com/t/destroy-all-children-of-object/92016
+        foreach (Transform child in transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+
+        // Source : https://gamedevbeginner.com/how-to-destroy-an-object-in-unity/
+        Destroy(this.gameObject);
     }
 
     private void PrepareAssetToBeEaten()
@@ -107,7 +113,6 @@ public class EatenAsset : MonoBehaviour
         // Prepare the asset's position and rotation before being synced with the player's
         Vector3 assetPreviousPosition = this.transform.localPosition;
         assetPreviousPosition = CorrectYPosition(assetPreviousPosition);
-        //Quaternion assetPreviousRotation = transform.rotation;
         m_distanceToPlayer = assetPreviousPosition - m_playerBlob.position;
         m_AssetRotation = this.transform.localRotation;
         IsBeingEaten = false;

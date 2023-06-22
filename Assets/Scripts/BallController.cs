@@ -8,6 +8,7 @@ public class BallController : MonoBehaviour
 {
     public float m_speed = 10.0f;
     public float m_torque = 20.0f;
+    public float m_acceleration = 10.0f;
     public float m_jumpForce = 2.0f;
     public float m_cameraJumpSpeed = 0.5f;
 
@@ -64,6 +65,30 @@ public class BallController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (IsGrounded && Input.GetKey(KeyCode.LeftControl))
+        {
+            // Source : https://discussions.unity.com/t/braking-torque-on-a-rigid-body/72806
+            m_ballRigidbody.angularVelocity = Vector3.zero;
+            m_jellyMesh.m_squashing = m_prepareJumpSquashing;
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            m_jellyMesh.m_squashing = m_initialSquashing;
+        }
+
+        if (IsGrounded)
+        {
+            GroundedControls();
+        }
+        else
+        {
+            MidAirControls();
+        }
+    }
+
+    private void GroundedControls()
+    {
         // Source : Maxime Flageole and Alexandre Pipon
         m_lerpElapsedTime += Time.fixedDeltaTime;
 
@@ -93,6 +118,39 @@ public class BallController : MonoBehaviour
 
         // Source: https://docs.unity3d.com/ScriptReference/Rigidbody.AddTorque.html
         m_ballRigidbody.AddTorque(GetIsShiftPressed() * m_speed * m_torque * Time.fixedDeltaTime * direction, ForceMode.Force);
+    }
+
+    private void MidAirControls()
+    {
+        // Source : https://forum.unity.com/threads/character-jumping-when-i-look-up-and-move-forward.1317753/
+        // Source : https://forum.unity.com/threads/what-is-transform-forward.338384/
+        m_lerpElapsedTime += Time.fixedDeltaTime;
+
+        Vector3 direction = new Vector3();
+
+        if (Input.GetKey(KeyCode.W))
+        {
+            direction += m_thirdPersonCamera.transform.forward;
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            direction -= m_thirdPersonCamera.transform.right;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            direction -= m_thirdPersonCamera.transform.forward;
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            direction += m_thirdPersonCamera.transform.right;
+        }
+
+        if (direction.magnitude <= 0)
+        {
+            return;
+        }
+
+        m_ballRigidbody.AddForce(m_speed * m_acceleration * Time.fixedDeltaTime * direction, ForceMode.Acceleration);
     }
 
     // Is called at the add torque, if the player is pressing the shift key, it will increase the speed of the ball.
