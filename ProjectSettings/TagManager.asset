@@ -26,11 +26,11 @@ TagManager:
   - HardProps
   - JumpDetector
   - BlobFullCollider
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ligths
+  - InvisibleWalls
+  - Platform
+  - AiActivator
+  - StomacTrigger
   - 
   - 
   - 
