@@ -3,28 +3,34 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Jumpable
+  - PlayerBlob
+  - Movable
+  - NPC
+  - Eaten
+  - BloblAbsorb
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - WallsAndFloors
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - PlayerBlob
+  - NPCs
+  - EatenAssets
+  - MovableProps
+  - Jumpable
+  - BlobFullTrigger
+  - HardProps
+  - JumpDetector
+  - BlobFullCollider
+  - Ligths
+  - InvisibleWalls
+  - Platform
+  - AiActivator
+  - StomacTrigger
   - 
   - 
   - 
