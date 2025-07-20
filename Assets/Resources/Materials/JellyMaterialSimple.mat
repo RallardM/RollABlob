@@ -114,7 +114,7 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _IOR: -0.19
-    - _Metallic: 0.898
+    - _Metallic: 1
     - _NormalInfluence: -0.19
     - _NormalStrength: 25.59
     - _OcclusionStrength: 1
@@ -124,7 +124,7 @@ Material:
     - _ReceiveShadows: 1
     - _SSSIntensity: -0.02
     - _SSSPower: 0.26
-    - _Smoothness: 0.987
+    - _Smoothness: 0.901
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 5
@@ -133,8 +133,8 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.09812199, g: 0.3301885, b: 0.12464384, a: 0.95686275}
-    - _Color: {r: 0.09812196, g: 0.33018848, b: 0.12464381, a: 0.95686275}
+    - _BaseColor: {r: 0.25658596, g: 0.5849056, b: 0.31003335, a: 0.89411765}
+    - _Color: {r: 0.25658593, g: 0.5849056, b: 0.31003332, a: 0.89411765}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SSSColor: {r: 0.95283127, g: 0.9716981, b: 0.44459772, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
